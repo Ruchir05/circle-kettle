@@ -1,0 +1,29 @@
+[
+  {
+    "slug": "ethiopia-yirgacheffe",
+    "name": "Ethiopia Yirgacheffe",
+    "shortNotes": "Jasmine, bergamot, honeyed lemon",
+    "longNotes": "Classic washed profile: luminous florals, tea-like body, and a clean citrus sweetness that lingers. Lovely as pour-over.",
+    "origin": "Gedeb, Ethiopia",
+    "process": "Washed",
+    "image": "/coffees/ethiopia-yirgacheffe.svg"
+  },
+  {
+    "slug": "colombia-huila",
+    "name": "Colombia Huila",
+    "shortNotes": "Red apple, panela, milk chocolate",
+    "longNotes": "Balanced and comforting with a caramelized sweetness and soft acidity—an easy crowd-pleaser for first-time tasters.",
+    "origin": "Huila, Colombia",
+    "process": "Washed",
+    "image": "/coffees/colombia-huila.svg"
+  },
+  {
+    "slug": "sumatra-mandheling",
+    "name": "Sumatra Mandheling",
+    "shortNotes": "Cedar, dark cocoa, earthy spice",
+    "longNotes": "Full body and low brightness, with herbal depth and a long, smoky finish. Best when you want something bold on the table.",
+    "origin": "North Sumatra, Indonesia",
+    "process": "Semi-washed",
+    "image": "/coffees/sumatra-mandheling.svg"
+  }
+]

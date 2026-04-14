@@ -1,26 +1,116 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f6f3ee;
+  --surface: #fbf9f6;
+  --foreground: #1f1f1f;
+  --foreground-muted: rgba(31, 31, 31, 0.62);
+  --border: rgba(31, 31, 31, 0.1);
+  --accent: #8b6a55;
+  --accent-foreground: #fbf9f6;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-foreground-muted: var(--foreground-muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --font-sans: var(--font-dm-sans);
+  --font-serif: var(--font-fraunces);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-dm-sans), system-ui, sans-serif;
+}
+
+/* Form fields: flat surface (no OS “glossy” select chrome) */
+input.form-field,
+textarea.form-field {
+  background-color: var(--surface);
+  box-shadow: none;
+}
+
+/* Select: strip native styling (WebKit/Firefox); one flat background + chevron */
+select.form-field {
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  box-shadow: none !important;
+  color: var(--foreground);
+  color-scheme: light;
+  padding-right: 2.75rem;
+  /* Shorthand replaces all background layers so UA gradients cannot show through */
+  background: var(--surface)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath stroke='%231f1f1f' stroke-opacity='0.5' stroke-width='1.5' stroke-linecap='round' d='M1.5 1.5L6 6l4.5-4.5'/%3E%3C/svg%3E")
+    no-repeat right 1rem center / 12px 8px;
+}
+
+select.form-field::-ms-expand {
+  display: none;
+}
+
+select.form-field:focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 2px;
+}
+
+/* Dialog: centered in the viewport */
+.bean-dialog {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  margin: 0;
+  max-width: min(100vw - 2rem, 28rem);
+  width: min(100vw - 2rem, 28rem);
+  transform: translate(-50%, -50%);
+}
+
+.bean-dialog::backdrop {
+  background: rgba(31, 31, 31, 0.45);
+}
+
+/* Bean card: name + notes slide up from bottom on hover (fine pointer); always visible on coarse / small */
+.bean-slide-overlay {
+  transform: translateY(100%);
+  transition: transform 280ms ease-out;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .group:hover .bean-slide-overlay {
+    transform: translateY(0);
+  }
+}
+
+@media (hover: none), (max-width: 639px) {
+  .bean-slide-overlay {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bean-slide-overlay {
+    transform: translateY(0) !important;
+    transition: none !important;
+  }
+
+  .bean-dialog,
+  .bean-dialog::backdrop {
+    transition: none !important;
+  }
 }
