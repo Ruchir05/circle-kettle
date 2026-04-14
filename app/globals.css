@@ -70,21 +70,6 @@ select.form-field:focus-visible {
   outline-offset: 2px;
 }
 
-/* Dialog: centered in the viewport */
-.bean-dialog {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  margin: 0;
-  max-width: min(100vw - 2rem, 28rem);
-  width: min(100vw - 2rem, 28rem);
-  transform: translate(-50%, -50%);
-}
-
-.bean-dialog::backdrop {
-  background: rgba(31, 31, 31, 0.45);
-}
-
 /* Bean card: name + notes slide up from bottom on hover (fine pointer); always visible on coarse / small */
 .bean-slide-overlay {
   transform: translateY(100%);
@@ -109,8 +94,7 @@ select.form-field:focus-visible {
     transition: none !important;
   }
 
-  .bean-dialog,
-  .bean-dialog::backdrop {
+  .coffee-detail-drawer {
     transition: none !important;
   }
 }

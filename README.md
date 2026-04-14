@@ -71,7 +71,7 @@ If Supabase env vars are missing, `/api/slots` still returns the slot grid with 
 
 ## Content
 
-Three coffee listings live in [`data/coffees.json`](data/coffees.json) with images under [`public/coffees/`](public/coffees/). On the **homepage**, they appear in a **full-width row** (same horizontal padding as the rest of the page) **below “Calm space, clear flavors”**; the hours/address block sits **below** the coffee row. Hover reveals name and notes; click opens a **centered** detail dialog. They also power the booking form’s coffee dropdown. Swap JSON and artwork without touching the database.
+Three coffee listings live in [`data/coffees.json`](data/coffees.json) with images under [`public/coffees/`](public/coffees/). On the **homepage**, they appear in a **full-width row** (same horizontal padding as the rest of the page) **below “Calm space, clear flavors”**; the hours/address block sits **below** the coffee row. Hover reveals name and notes; click opens a **slide-in panel from the right** (about one-third of the viewport) with full tasting copy. They also power the booking form’s coffee dropdown. Swap JSON and artwork without touching the database.
 
 ## Optional hardening
 

@@ -6,32 +6,53 @@ import { useCallback, useEffect, useId, useRef, useState } from "react";
 type Props = { coffees: Coffee[] };
 
 export function HomeBeanShowcase({ coffees }: Props) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const [active, setActive] = useState<Coffee | null>(null);
+  const [detail, setDetail] = useState<Coffee | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const titleId = useId();
   const descId = useId();
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
 
-  useEffect(() => {
-    if (!active) return;
-    const el = dialogRef.current;
-    if (el && !el.open) el.showModal();
-  }, [active]);
-
-  const close = useCallback(() => {
-    dialogRef.current?.close();
+  const openPanel = useCallback((coffee: Coffee) => {
+    setDetail(coffee);
+    const instant =
+      typeof window !== "undefined" &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (instant) {
+      setDrawerOpen(true);
+      return;
+    }
+    setDrawerOpen(false);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => setDrawerOpen(true));
+    });
   }, []);
 
-  useEffect(() => {
-    const el = dialogRef.current;
-    if (!el) return;
-    const onClose = () => setActive(null);
-    el.addEventListener("close", onClose);
-    return () => el.removeEventListener("close", onClose);
+  const closePanel = useCallback(() => {
+    setDrawerOpen(false);
   }, []);
 
-  const onDialogClick = (e: React.MouseEvent<HTMLDialogElement>) => {
-    if (e.target === e.currentTarget) close();
-  };
+  const onDrawerTransitionEnd = useCallback((e: React.TransitionEvent<HTMLElement>) => {
+    if (e.propertyName !== "transform") return;
+    if (!drawerOpen) setDetail(null);
+  }, [drawerOpen]);
+
+  useEffect(() => {
+    if (!detail) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") closePanel();
+    };
+    document.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [detail, closePanel]);
+
+  useEffect(() => {
+    if (!detail || !drawerOpen) return;
+    closeBtnRef.current?.focus();
+  }, [detail, drawerOpen]);
 
   return (
     <>
@@ -44,7 +65,7 @@ export function HomeBeanShowcase({ coffees }: Props) {
           <div key={coffee.slug} role="listitem" className="min-w-0">
             <button
               type="button"
-              onClick={() => setActive(coffee)}
+              onClick={() => openPanel(coffee)}
               className="group relative w-full min-w-0 overflow-hidden border border-[color:var(--border)] bg-[color:var(--surface)] text-left"
             >
               <span className="relative block aspect-square w-full overflow-hidden">
@@ -70,67 +91,85 @@ export function HomeBeanShowcase({ coffees }: Props) {
         ))}
       </div>
 
-      <dialog
-        ref={dialogRef}
-        className="bean-dialog max-h-[min(90vh,40rem)] overflow-y-auto border border-[color:var(--border)] bg-[color:var(--surface)] p-0 text-[color:var(--foreground)] shadow-2xl"
-        aria-labelledby={titleId}
-        aria-describedby={descId}
-        onClick={onDialogClick}
-      >
-        {active && (
-          <div className="p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
-            <div className="flex items-start justify-between gap-4">
-              <h2 id={titleId} className="font-serif text-2xl tracking-tight sm:text-3xl">
-                {active.name}
-              </h2>
-              <button
-                type="button"
-                onClick={close}
-                className="shrink-0 border border-[color:var(--border)] px-3 py-1.5 text-sm font-medium text-[color:var(--foreground-muted)] transition-colors hover:border-[color:var(--foreground)]/25 hover:text-[color:var(--foreground)]"
-              >
-                Close
-              </button>
+      {detail && (
+        <div
+          className={`fixed inset-0 z-50 ${drawerOpen ? "pointer-events-auto" : "pointer-events-none"}`}
+          role="presentation"
+        >
+          <button
+            type="button"
+            aria-label="Close coffee details"
+            className={`absolute inset-0 bg-[#1f1f1f] transition-opacity duration-500 ease-out motion-reduce:transition-none ${
+              drawerOpen ? "opacity-40" : "opacity-0"
+            }`}
+            onClick={closePanel}
+          />
+
+          <aside
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby={titleId}
+            aria-describedby={descId}
+            onTransitionEnd={onDrawerTransitionEnd}
+            className={`coffee-detail-drawer pointer-events-auto absolute right-0 top-0 flex h-full w-1/3 min-w-[min(100%,18rem)] flex-col border-l border-[color:var(--border)] bg-[color:var(--surface)] shadow-[-12px_0_40px_-12px_rgba(31,31,31,0.2)] transition-transform duration-500 ease-out motion-reduce:transition-none ${
+              drawerOpen ? "translate-x-0" : "translate-x-full"
+            }`}
+          >
+            <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-6 sm:p-8">
+              <div className="flex shrink-0 items-start justify-between gap-4">
+                <h2 id={titleId} className="font-serif text-2xl tracking-tight sm:text-3xl">
+                  {detail.name}
+                </h2>
+                <button
+                  ref={closeBtnRef}
+                  type="button"
+                  onClick={closePanel}
+                  className="shrink-0 border border-[color:var(--border)] px-3 py-1.5 text-sm font-medium text-[color:var(--foreground-muted)] transition-colors hover:border-[color:var(--foreground)]/25 hover:text-[color:var(--foreground)]"
+                >
+                  Close
+                </button>
+              </div>
+              <p id={descId} className="mt-2 shrink-0 text-sm text-[color:var(--foreground-muted)]">
+                {detail.shortNotes}
+              </p>
+
+              <div className="mt-6 shrink-0 overflow-hidden border border-[color:var(--border)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={detail.image}
+                  alt=""
+                  width={800}
+                  height={600}
+                  className="h-auto w-full object-cover"
+                />
+              </div>
+
+              <p className="mt-6 text-base leading-relaxed">{detail.longNotes}</p>
+
+              {(detail.origin || detail.process) && (
+                <dl className="mt-8 grid shrink-0 gap-6 border-t border-[color:var(--border)] pt-6">
+                  {detail.origin && (
+                    <div>
+                      <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
+                        Origin
+                      </dt>
+                      <dd className="mt-2 text-sm">{detail.origin}</dd>
+                    </div>
+                  )}
+                  {detail.process && (
+                    <div>
+                      <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
+                        Process
+                      </dt>
+                      <dd className="mt-2 text-sm">{detail.process}</dd>
+                    </div>
+                  )}
+                </dl>
+              )}
             </div>
-            <p id={descId} className="mt-2 text-sm text-[color:var(--foreground-muted)]">
-              {active.shortNotes}
-            </p>
-
-            <div className="mt-6 overflow-hidden border border-[color:var(--border)]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={active.image}
-                alt=""
-                width={800}
-                height={600}
-                className="h-auto w-full object-cover"
-              />
-            </div>
-
-            <p className="mt-6 text-base leading-relaxed">{active.longNotes}</p>
-
-            {(active.origin || active.process) && (
-              <dl className="mt-8 grid gap-6 border-t border-[color:var(--border)] pt-6 sm:grid-cols-2">
-                {active.origin && (
-                  <div>
-                    <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-                      Origin
-                    </dt>
-                    <dd className="mt-2 text-sm">{active.origin}</dd>
-                  </div>
-                )}
-                {active.process && (
-                  <div>
-                    <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-                      Process
-                    </dt>
-                    <dd className="mt-2 text-sm">{active.process}</dd>
-                  </div>
-                )}
-              </dl>
-            )}
-          </div>
-        )}
-      </dialog>
+          </aside>
+        </div>
+      )}
     </>
   );
 }
