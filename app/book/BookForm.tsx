@@ -481,8 +481,8 @@ export function BookForm() {
                   <li
                     key={row.slug}
                     data-book-reveal="up"
-                    className={`book-reveal-init book-on-light-surface flex flex-wrap items-center gap-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3 text-sm sm:flex-nowrap sm:justify-between ${
-                      soldOut ? "opacity-50" : ""
+                    className={`book-reveal-init book-on-light-surface flex flex-wrap items-center gap-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3 text-sm transition-opacity duration-500 sm:flex-nowrap sm:justify-between ${
+                      soldOut ? "opacity-45 book-sold-out-fade" : "opacity-100"
                     }`}
                   >
                     <label

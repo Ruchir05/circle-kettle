@@ -245,6 +245,19 @@ html[data-theme="dark"] .book-page {
   will-change: opacity, filter;
 }
 
+@keyframes book-sold-out-fade {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.45;
+  }
+}
+
+.book-sold-out-fade {
+  animation: book-sold-out-fade 600ms ease-out forwards;
+}
+
 /* Hero cream rail: 90% of inset height (inset ≈ viewport minus section bottom padding). */
 @media (min-width: 1024px) {
   .hero-cream-rail-height {
@@ -334,5 +347,9 @@ select.form-field:focus-visible {
     filter: none !important;
     clip-path: none !important;
     will-change: auto !important;
+  }
+
+  .book-sold-out-fade {
+    animation: none !important;
   }
 }
