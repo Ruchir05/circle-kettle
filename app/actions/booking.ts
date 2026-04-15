@@ -83,12 +83,35 @@ export async function submitBooking(
         message: "That slot just filled up. Please pick another time.",
       };
     }
-    return { ok: false, message: "We could not complete the booking. Please try again." };
+    const hint = [error.message, (error as { details?: string }).details]
+      .filter(Boolean)
+      .join(" — ")
+      .slice(0, 280);
+    return {
+      ok: false,
+      message: hint
+        ? `Could not complete booking: ${hint}`
+        : "We could not complete the booking. Please try again.",
+    };
+  }
+
+  const id =
+    typeof bookingId === "string"
+      ? bookingId
+      : bookingId != null
+        ? String(bookingId)
+        : undefined;
+  if (!id) {
+    return {
+      ok: false,
+      message:
+        "Booking did not return a confirmation id. Check that the SQL migration ran in this Supabase project.",
+    };
   }
 
   return {
     ok: true,
     message: "You are booked. See you at Circle Kettle.",
-    bookingId: typeof bookingId === "string" ? bookingId : undefined,
+    bookingId: id,
   };
 }

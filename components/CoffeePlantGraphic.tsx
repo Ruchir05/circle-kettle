@@ -8,7 +8,7 @@ export function CoffeePlantGraphic() {
       viewBox="0 0 220 300"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
-      className="coffee-plant-graphic-svg h-auto w-full max-w-[min(300px,72vw)] sm:max-w-[min(360px,58vw)] lg:max-w-[440px] xl:max-w-[520px]"
+      className="coffee-plant-graphic-svg h-auto w-full max-w-none max-md:h-[min(56dvh,30rem)] max-md:w-auto max-md:max-w-[min(88vw,22rem)] md:h-auto md:w-full md:max-w-none"
       aria-hidden
     >
       <path

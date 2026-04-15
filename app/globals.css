@@ -12,7 +12,6 @@
   /* Hero (default: charcoal). Light mode uses old-branch cream + ink via [data-theme="light"]. */
   --hero-bg: #2c2c2c;
   --hero-text: #ffffff;
-  --hero-heading: rgba(255, 255, 255, 0.88);
   --hero-text-muted: rgba(255, 255, 255, 0.72);
   --hero-kicker: rgba(255, 255, 255, 0.55);
   --hero-link: #ffffff;
@@ -28,7 +27,6 @@
 html[data-theme="light"] {
   --hero-bg: #f6f3ee;
   --hero-text: #1f1f1f;
-  --hero-heading: rgba(31, 31, 31, 0.52);
   --hero-text-muted: rgba(31, 31, 31, 0.62);
   --hero-kicker: rgba(31, 31, 31, 0.48);
   --hero-link: #1f1f1f;

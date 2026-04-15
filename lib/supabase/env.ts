@@ -13,3 +13,8 @@ export function getSupabasePublishableKey(): string | undefined {
     undefined
   );
 }
+
+/** Server-only: secret (`sb_secret_…`) or legacy `service_role` JWT. */
+export function getServiceRoleKey(): string | undefined {
+  return process.env.SUPABASE_SERVICE_ROLE_KEY?.trim() || undefined;
+}

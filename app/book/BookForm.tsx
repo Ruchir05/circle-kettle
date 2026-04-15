@@ -57,12 +57,24 @@ export function BookForm() {
           `/api/slots?date=${encodeURIComponent(POPUP_EVENT_DATE)}`,
           { cache: "no-store" },
         );
+        const json = (await res.json()) as {
+          slots?: SlotRow[];
+          error?: string;
+          message?: string;
+          supabase_error?: string;
+        };
         if (!res.ok) {
-          setSlotsError("Could not load availability.");
+          setSlotsError(
+            json.message ?? json.error ?? `Could not load availability (${res.status}).`,
+          );
           setSlots([]);
           return;
         }
-        const json = (await res.json()) as { slots: SlotRow[] };
+        if (json.supabase_error) {
+          setSlotsError(
+            `Live counts unavailable (${json.supabase_error}). Slots still show full capacity for planning.`,
+          );
+        }
         setSlots(json.slots ?? []);
       } catch {
         setSlotsError("Could not load availability.");
@@ -73,6 +85,20 @@ export function BookForm() {
 
   useEffect(() => {
     loadSlots();
+  }, [loadSlots]);
+
+  /** Keep slot counts in sync when bookings change (e.g. admin delete); avoids needing a full reload. */
+  useEffect(() => {
+    const intervalMs = 25_000;
+    const interval = window.setInterval(() => loadSlots(), intervalMs);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") loadSlots();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, [loadSlots]);
 
   useEffect(() => {

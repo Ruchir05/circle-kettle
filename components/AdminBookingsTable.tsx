@@ -1,4 +1,5 @@
 import { adminLogout } from "@/app/actions/adminAuth";
+import { AdminDeleteBookingButton } from "@/components/AdminDeleteBookingButton";
 import { getCoffeeChoiceLabel } from "@/lib/coffees";
 import { POPUP_TIMEZONE } from "@/lib/config";
 import { DateTime } from "luxon";
@@ -41,7 +42,7 @@ export function AdminBookingsTable({ rows }: { rows: AdminBookingRow[] }) {
 
   return (
     <div className="overflow-x-auto rounded border border-[color:var(--border)] bg-[color:var(--surface)]">
-      <table className="w-full min-w-[56rem] border-collapse text-left text-sm">
+      <table className="w-full min-w-[60rem] border-collapse text-left text-sm">
         <thead>
           <tr className="border-b border-[color:var(--border)] text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--foreground-muted)]">
             <th className="px-4 py-3 font-semibold">Slot</th>
@@ -53,6 +54,7 @@ export function AdminBookingsTable({ rows }: { rows: AdminBookingRow[] }) {
             <th className="px-4 py-3 font-semibold">Notes</th>
             <th className="px-4 py-3 font-semibold">Booked</th>
             <th className="px-4 py-3 font-semibold">Status</th>
+            <th className="px-4 py-3 w-24 font-semibold text-right">Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -92,6 +94,9 @@ export function AdminBookingsTable({ rows }: { rows: AdminBookingRow[] }) {
                 {formatCreated(row.created_at)}
               </td>
               <td className="px-4 py-3 whitespace-nowrap">{row.status}</td>
+              <td className="px-4 py-3 align-top">
+                <AdminDeleteBookingButton bookingId={row.id} />
+              </td>
             </tr>
           ))}
         </tbody>
@@ -141,6 +146,9 @@ export function AdminBookingsCards({ rows }: { rows: AdminBookingRow[] }) {
             Party of {row.party_size} · {row.status}
           </p>
           {row.notes?.trim() ? <p className="mt-2 text-[color:var(--foreground-muted)]">{row.notes}</p> : null}
+          <div className="mt-4 flex justify-end border-t border-[color:var(--border)] pt-3">
+            <AdminDeleteBookingButton bookingId={row.id} />
+          </div>
         </li>
       ))}
     </ul>

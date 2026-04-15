@@ -24,37 +24,47 @@ export function EventHeroBanner() {
       */}
       <div className="flex w-full min-h-0 flex-1 flex-col lg:h-[calc(100dvh-12dvh)] lg:min-h-[calc(100dvh-12dvh)] lg:flex-row lg:items-stretch">
         {/* Main charcoal — stretches full row height on lg; copy vertically centered */}
-        <div className="relative flex min-h-[calc(100dvh-12dvh)] flex-1 flex-col justify-center px-6 py-14 sm:px-8 sm:py-16 lg:min-h-0 lg:flex-1 lg:py-0 lg:pl-8 lg:pr-4 xl:pl-12">
-          <div className="relative z-[2] mx-auto w-full max-w-6xl lg:mx-0 lg:max-w-none">
-            <div className={copyMax}>
-              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--hero-kicker)]">
-                One day only · UIUC
-              </p>
-              <h1 className="mt-6 text-4xl font-semibold leading-[1.08] tracking-tight text-[color:var(--hero-heading)] sm:text-5xl lg:text-6xl xl:text-[3.5rem] xl:leading-[1.06]">
-                Coffee, unhurried. A thirty-minute table for up to four.
-              </h1>
+        <div className="relative flex min-h-[calc(100dvh-12dvh)] flex-1 flex-col px-6 py-14 sm:px-8 sm:py-16 lg:min-h-0 lg:flex-1 lg:justify-center lg:py-0 lg:pl-8 lg:pr-4 xl:pl-12">
+          {/*
+            < lg: copy + plant share space in normal flow (no full-bleed overlay), so the graphic
+            sits in empty margin — column + bottom-right on phones, row + right column on md–lg.
+            lg+: plant returns to an absolute layer (decorative, right edge) like before.
+          */}
+          <div className="relative z-[2] mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 md:flex-row md:items-center md:justify-between md:gap-6 lg:mx-0 lg:flex lg:h-full lg:max-w-none lg:min-h-0 lg:flex-1 lg:flex-col">
+            <div className="relative z-[2] flex min-h-0 flex-1 flex-col justify-center md:min-w-0 lg:z-[3] lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:justify-center">
+              <div className={copyMax}>
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--hero-kicker)]">
+                  One day only · UIUC
+                </p>
+                <h1 className="mt-6 text-4xl font-semibold leading-[1.08] tracking-tight text-[color:var(--hero-text-muted)] sm:text-5xl lg:text-6xl xl:text-[3.5rem] xl:leading-[1.06]">
+                  Coffee, unhurried. A thirty-minute table for up to four.
+                </h1>
 
-              <p className="mt-8 text-base leading-relaxed text-[color:var(--hero-text-muted)] sm:text-lg">
-                We brew a focused menu of single-origin lots—bright, balanced, and bold—so you can taste
-                with a little guidance and a lot of room to talk. Book a slot, pick a coffee or stay
-                open-minded, and we will meet you there.
-              </p>
+                <p className="mt-8 text-base leading-relaxed text-[color:var(--hero-text-muted)] sm:text-lg">
+                  We brew a focused menu of single-origin lots—bright, balanced, and bold—so you can taste
+                  with a little guidance and a lot of room to talk. Book a slot, pick a coffee or stay
+                  open-minded, and we will meet you there.
+                </p>
 
-              <div className="mt-10">
-                <Link href="/book" className={heroLinkClass}>
-                  Book a tasting
-                </Link>
+                <div className="mt-10">
+                  <Link href="/book" className={heroLinkClass}>
+                    Book a tasting
+                  </Link>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Botanical — out of flow */}
-          <div
-            className="coffee-plant-motion pointer-events-none absolute inset-0 z-[1] flex items-end justify-center pb-6 sm:pb-10 lg:items-center lg:justify-end lg:pb-0 lg:pr-0"
-            aria-hidden
-          >
-            <div className="flex w-full max-w-[min(92%,20rem)] justify-center sm:max-w-[min(92%,24rem)] lg:absolute lg:right-0 lg:top-1/2 lg:max-w-none lg:w-[min(92%,34rem)] lg:-translate-y-1/2 lg:translate-x-[14%] lg:justify-end xl:w-[min(92%,38rem)] xl:translate-x-[18%]">
-              <CoffeePlantGraphic />
+            <div
+              className="coffee-plant-motion pointer-events-none mt-auto flex min-h-0 w-full shrink-0 justify-end self-end pb-1 sm:pb-2 md:mt-0 md:min-w-0 md:flex-1 md:self-center md:justify-end md:pb-0 lg:absolute lg:inset-0 lg:z-[1] lg:mt-0 lg:flex lg:items-center lg:justify-end lg:pb-0 lg:pr-0"
+              aria-hidden
+            >
+              {/*
+                Below lg: scale up with viewport so the branch reads as a hero motif, not a favicon.
+                min() keeps it off the left edge; md:flex-1 lets the right column swallow spare width.
+              */}
+              <div className="flex w-[min(88vw,22rem)] max-w-full min-w-[12rem] justify-end sm:w-[min(82vw,26rem)] sm:min-w-[14rem] md:w-[min(100%,48vw,30rem)] md:max-w-[min(100%,32rem)] lg:absolute lg:right-0 lg:top-1/2 lg:max-w-none lg:w-[min(92%,34rem)] lg:min-w-0 lg:-translate-y-1/2 lg:translate-x-[14%] lg:justify-end xl:w-[min(92%,38rem)] xl:translate-x-[18%]">
+                <CoffeePlantGraphic />
+              </div>
             </div>
           </div>
         </div>
