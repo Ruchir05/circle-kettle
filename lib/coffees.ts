@@ -3,9 +3,13 @@ import coffeesData from "@/data/coffees.json";
 export type Coffee = {
   slug: string;
   name: string;
+  subtitle?: string;
   shortNotes: string;
   longNotes: string;
   origin?: string;
+  variety?: string;
+  producer?: string;
+  elevation?: string;
   process?: string;
   image: string;
 };
@@ -18,6 +22,12 @@ export function getCoffees(): Coffee[] {
 
 export function getCoffeeBySlug(slug: string): Coffee | undefined {
   return list.find((c) => c.slug === slug);
+}
+
+/** Label for booking `coffee_choice` (slug or `unsure`). */
+export function getCoffeeChoiceLabel(slug: string): string {
+  if (slug === "unsure") return "Unsure — surprise me";
+  return getCoffeeBySlug(slug)?.name ?? slug;
 }
 
 export function getCoffeeSlugs(): string[] {

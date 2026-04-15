@@ -1,6 +1,6 @@
 # Circle Kettle
 
-Next.js (App Router) site for **Circle Kettle** at **UIUC**: **charcoal and warm off‑white** editorial layout, **three featured coffees on the homepage** (each opens a detail dialog), and **Supabase-backed reservations** for shared 30‑minute slots with a configurable headcount cap.
+Next.js (App Router) site for **Circle Kettle** at **UIUC**: **charcoal and warm off‑white** editorial layout, **three featured coffees on the homepage** (each opens a slide-in detail panel), and **Supabase-backed reservations** for shared 30‑minute slots with a configurable headcount cap.
 
 ## Stack
 
@@ -15,8 +15,8 @@ Next.js (App Router) site for **Circle Kettle** at **UIUC**: **charcoal and warm
 
 ```bash
 npm install
-cp .env.example .env.local
-# fill in Supabase keys (see below)
+cp .env.example .env.local   # skip if .env.local already exists
+# fill in Supabase keys — step-by-step: [docs/supabase-env-setup.md](docs/supabase-env-setup.md)
 npm run dev
 ```
 
@@ -43,13 +43,24 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Keep `SUPABASE_SERVICE_ROLE_KEY` **server-only** (never `NEXT_PUBLIC_*`).
 
+## Admin dashboard
+
+- **URL:** **`/admin`** on your site origin (local: [http://localhost:3000/admin](http://localhost:3000/admin)). If you are not signed in, you are sent to **`/admin/login`**.  
+- **Sign-in:** By default both **username** and **password** are **`coffee`** (no env vars required for that demo setup). Set `ADMIN_DASHBOARD_USERNAME` and `ADMIN_DASHBOARD_PASSWORD` in `.env.local` to override.  
+- The dashboard lists **all bookings** (name, email, phone, slot, party size, coffee choice, notes) using the **service role** on the server only; `bookings` stays closed to the browser anon key.  
+- Routes under `/admin` except `/admin/login` are protected by **middleware** (signed **httpOnly** cookie). Use **Sign out** on the dashboard to clear the session.
+
 ## Environment variables
 
 | Variable | Required | Purpose |
 |----------|----------|---------|
 | `NEXT_PUBLIC_SUPABASE_URL` | For bookings + live availability | Supabase API URL |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | For live availability | Calls `get_slot_booked_totals` from `GET /api/slots` |
-| `SUPABASE_SERVICE_ROLE_KEY` | For creating bookings | Server action `create_booking` RPC |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | For live availability + SSR helpers | New **Publishable** key (`sb_publishable_…`); preferred |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Optional fallback | Legacy **anon** JWT if publishable key is not set |
+| `SUPABASE_SERVICE_ROLE_KEY` | For creating bookings + `/admin` | Legacy **service_role** JWT or new **Secret** key (`sb_secret_…`); server-only |
+| `ADMIN_DASHBOARD_USERNAME` | Optional (default **`coffee`**) | Admin login username |
+| `ADMIN_DASHBOARD_PASSWORD` | Optional (default **`coffee`**) | Admin login password; also used to sign the session cookie unless `ADMIN_SESSION_SECRET` is set |
+| `ADMIN_SESSION_SECRET` | Optional | If set, used to sign admin cookies instead of the dashboard password |
 | `BOOKING_SLOT_CAPACITY` | Optional (default `8`) | Max total guests per 30‑minute slot |
 
 If Supabase env vars are missing, `/api/slots` still returns the slot grid with **full remaining capacity** (`demo: true`) so the UI can be reviewed; the server action returns a clear “not configured” message until keys are set.
@@ -64,10 +75,18 @@ If Supabase env vars are missing, `/api/slots` still returns the slot grid with 
 
 ## Deploying to Vercel
 
+Vercel **does not read** a committed `.env.local` from the repo. You configure variables in the Vercel dashboard (or CLI); builds inject them at compile/runtime. **`.env.local` stays gitignored** so secret keys are never pushed to GitHub.
+
 1. Push the repository to GitHub (or GitLab / Bitbucket).  
-2. [Import the project](https://vercel.com/new) in Vercel.  
-3. Add the same environment variables as in `.env.example` in the Vercel project settings.  
-4. Deploy.  
+2. [Import the project](https://vercel.com/new) in Vercel and connect the repo.  
+3. In Vercel: **Project → Settings → Environment Variables**. For **Production** (and **Preview** if you use it), add each name from [`.env.example`](.env.example) that your app needs, at minimum:  
+   - `NEXT_PUBLIC_SUPABASE_URL`  
+   - `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` (`sb_publishable_…`, or use legacy `NEXT_PUBLIC_SUPABASE_ANON_KEY`)  
+   - `SUPABASE_SERVICE_ROLE_KEY` (secret `sb_secret_…` or legacy service_role)  
+   Paste the **same values** you use locally in `.env.local`.  
+4. **Redeploy** (Deployments → … → Redeploy) so a new build picks up the variables.  
+
+Local dev: keep using **`.env.local`** on your machine only (`cp .env.example .env.local` then fill in). After changing env on Vercel, redeploy; after changing `.env.local`, restart `npm run dev`.
 
 ## Content
 

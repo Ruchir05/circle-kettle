@@ -1,29 +1,37 @@
 [
   {
-    "slug": "ethiopia-yirgacheffe",
-    "name": "Ethiopia Yirgacheffe",
-    "shortNotes": "Jasmine, bergamot, honeyed lemon",
-    "longNotes": "Classic washed profile: luminous florals, tea-like body, and a clean citrus sweetness that lingers. Lovely as pour-over.",
-    "origin": "Gedeb, Ethiopia",
-    "process": "Washed",
-    "image": "/coffees/ethiopia-yirgacheffe.svg"
+    "slug": "flower-touch-7",
+    "name": "FLOWER TOUCH — 7",
+    "subtitle": "Gesha · Panama",
+    "shortNotes": "Wisteria · Grape · Peach",
+    "longNotes": "A luminous Gesha from Paso Ancho: layered florals, ripe stone fruit, and a clean, winey grape note that reads almost like chilled muscat. Built for slow pours and quiet attention.",
+    "origin": "Paso Ancho, Tierras Altas, Panama",
+    "variety": "Gesha",
+    "producer": "Edwin Santamaria",
+    "elevation": "1,900 masl",
+    "process": "2 days cold natural fermentation at 16°C, then 3 days washed fermentation at 16°C",
+    "image": "/coffees/flower-touch-7.png"
   },
   {
-    "slug": "colombia-huila",
-    "name": "Colombia Huila",
-    "shortNotes": "Red apple, panela, milk chocolate",
-    "longNotes": "Balanced and comforting with a caramelized sweetness and soft acidity—an easy crowd-pleaser for first-time tasters.",
+    "slug": "wilder-lazo-7",
+    "name": "WILDER LAZO — 7",
+    "subtitle": "Gesha · Colombia",
+    "shortNotes": "Earl Grey · Blueberry · Complex",
+    "longNotes": "Natural Gesha with a tea-like frame: bergamot and soft citrus lift over jammy blueberry and a long, shifting finish. For guests who like nuance without sharp acidity.",
+    "origin": "Colombia",
+    "variety": "Gesha",
+    "process": "Natural",
+    "image": "/coffees/wilder-lazo-7.png"
+  },
+  {
+    "slug": "el-chaferote-7",
+    "name": "EL CHAFEROTE — 7",
+    "subtitle": "Pink Bourbon · Colombia",
+    "shortNotes": "Grapefruit · Pear · Honeysuckle",
+    "longNotes": "Washed Pink Bourbon from Huila: bright pink citrus, rounded orchard sweetness, and a soft floral lift that stays clean through the cup. Approachable but still plenty to talk about.",
     "origin": "Huila, Colombia",
+    "variety": "Pink Bourbon",
     "process": "Washed",
-    "image": "/coffees/colombia-huila.svg"
-  },
-  {
-    "slug": "sumatra-mandheling",
-    "name": "Sumatra Mandheling",
-    "shortNotes": "Cedar, dark cocoa, earthy spice",
-    "longNotes": "Full body and low brightness, with herbal depth and a long, smoky finish. Best when you want something bold on the table.",
-    "origin": "North Sumatra, Indonesia",
-    "process": "Semi-washed",
-    "image": "/coffees/sumatra-mandheling.svg"
+    "image": "/coffees/el-chaferote-7.png"
   }
 ]

@@ -31,7 +31,8 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
+# Env files: keep real secrets out of git (Vercel uses Project → Settings → Environment Variables).
+# Do not commit SUPABASE_SERVICE_ROLE_KEY or publishable keys—public repo = compromised database.
 .env*
 !.env.example
 

@@ -85,7 +85,7 @@ export function BookForm() {
   return (
     <div className="grid gap-12 lg:grid-cols-5">
       <div className="lg:col-span-2">
-        <h2 className="font-serif text-3xl tracking-tight text-[color:var(--foreground)]">
+        <h2 className="text-3xl font-semibold tracking-tight text-[color:var(--foreground)]">
           Your visit
         </h2>
         <p className="mt-4 text-sm leading-relaxed text-[color:var(--foreground-muted)]">
@@ -119,7 +119,7 @@ export function BookForm() {
         />
 
         <fieldset key={POPUP_EVENT_DATE} className="space-y-4">
-          <legend className="font-serif text-2xl tracking-tight text-[color:var(--foreground)]">
+          <legend className="text-2xl font-semibold tracking-tight text-[color:var(--foreground)]">
             Timeslot
           </legend>
           {!slots?.length && !isPending && (

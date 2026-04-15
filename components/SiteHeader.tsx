@@ -8,7 +8,7 @@ export function SiteHeader() {
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-5">
         <Link
           href="/"
-          className="font-serif text-xl tracking-tight text-[color:var(--foreground)] transition-opacity hover:opacity-80 sm:text-2xl"
+          className="text-xl font-semibold tracking-tight text-[color:var(--foreground)] transition-opacity hover:opacity-80 sm:text-2xl"
         >
           Circle Kettle
         </Link>

@@ -44,7 +44,7 @@ revoke all on function public.get_slot_booked_totals(timestamptz, timestamptz) f
 grant execute on function public.get_slot_booked_totals(timestamptz, timestamptz) to anon;
 grant execute on function public.get_slot_booked_totals(timestamptz, timestamptz) to authenticated;
 
--- Serialized insert with per-slot capacity (default 8; override from app)
+-- Serialized insert with per-slot capacity (default 4; override from app)
 create or replace function public.create_booking(
   p_slot_start timestamptz,
   p_party_size int,
@@ -69,7 +69,7 @@ begin
     raise exception 'invalid_party_size';
   end if;
 
-  v_cap := coalesce(nullif(p_max_capacity, 0), 8);
+  v_cap := coalesce(nullif(p_max_capacity, 0), 4);
 
   perform pg_advisory_xact_lock(hashtext(p_slot_start::text));
 
