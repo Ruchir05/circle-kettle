@@ -15,7 +15,7 @@ export function EventHeroBanner() {
 
   return (
     <section
-      className="box-border flex min-h-[100dvh] flex-col pr-[8%] pb-[12dvh] text-[color:var(--hero-text)]"
+      className="hero-interactive-boundary box-border flex min-h-[100dvh] flex-col pr-[8%] pb-[12dvh] text-[color:var(--hero-text)]"
       style={{ backgroundColor: "var(--hero-bg)" }}
       suppressHydrationWarning
     >
@@ -33,7 +33,7 @@ export function EventHeroBanner() {
           */}
           <div className="relative z-[2] mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 md:flex-row md:items-center md:justify-between md:gap-6 lg:mx-0 lg:flex lg:h-full lg:max-w-none lg:min-h-0 lg:flex-1 lg:flex-col">
             <div className="relative z-[2] flex min-h-0 flex-1 flex-col justify-center md:min-w-0 lg:z-[3] lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:justify-center lg:self-start">
-              <div className={`${copyMax} text-left`}>
+              <div className={`${copyMax} hero-copy-enter text-left`}>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--hero-kicker)]">
                   {t("hero.kicker")}
                 </p>
@@ -48,14 +48,14 @@ export function EventHeroBanner() {
             </div>
 
             <div
-              className="coffee-plant-motion pointer-events-none mt-auto flex min-h-0 w-full shrink-0 justify-end self-end pb-1 sm:pb-2 md:mt-0 md:min-w-0 md:flex-1 md:self-center md:justify-end md:pb-0 lg:absolute lg:inset-0 lg:z-[1] lg:mt-0 lg:flex lg:items-center lg:justify-end lg:pb-0 lg:pr-0"
+              className="hero-plant-enter mt-auto hidden min-h-0 w-full shrink-0 justify-end self-end pb-1 sm:pb-2 md:mt-0 md:min-w-0 md:flex-1 md:self-center md:justify-end md:pb-0 lg:absolute lg:inset-0 lg:z-[1] lg:mt-0 lg:flex lg:items-center lg:justify-end lg:pb-0 lg:pr-0"
               aria-hidden
             >
               {/*
                 Below lg: scale up with viewport so the branch reads as a hero motif, not a favicon.
                 min() keeps it off the left edge; md:flex-1 lets the right column swallow spare width.
               */}
-              <div className="flex w-[min(88vw,22rem)] max-w-full min-w-[12rem] justify-end sm:w-[min(82vw,26rem)] sm:min-w-[14rem] md:w-[min(100%,48vw,30rem)] md:max-w-[min(100%,32rem)] lg:absolute lg:right-0 lg:top-1/2 lg:max-w-none lg:w-[min(92%,34rem)] lg:min-w-0 lg:-translate-y-1/2 lg:translate-x-[14%] lg:justify-end xl:w-[min(92%,38rem)] xl:translate-x-[18%]">
+              <div className="coffee-plant-motion flex w-[min(88vw,22rem)] max-w-full min-w-[12rem] justify-end sm:w-[min(82vw,26rem)] sm:min-w-[14rem] md:w-[min(100%,48vw,30rem)] md:max-w-[min(100%,32rem)] lg:absolute lg:right-0 lg:top-1/2 lg:max-w-none lg:w-[min(92%,34rem)] lg:min-w-0 lg:-translate-y-1/2 lg:translate-x-[14%] lg:justify-end xl:w-[min(92%,38rem)] xl:translate-x-[18%]">
                 <CoffeePlantGraphic />
               </div>
             </div>
@@ -63,11 +63,11 @@ export function EventHeroBanner() {
         </div>
 
         <aside
-          className="hero-cream-rail-height relative z-[3] flex w-full shrink-0 flex-col justify-center border-t border-t-[color:var(--hero-rail-border-t)] bg-[color:var(--surface)] px-6 py-9 text-[color:var(--foreground)] sm:px-7 lg:w-[clamp(13.25rem,19vw,16.5rem)] lg:shrink-0 lg:self-start lg:border-t-0 lg:border-l lg:border-l-[color:var(--hero-rail-border-l)] lg:px-5 lg:py-10 xl:w-[clamp(13.75rem,17vw,17.25rem)] xl:px-7"
+          className="hero-cream-rail-height hero-rail-enter relative z-[3] flex w-full shrink-0 flex-col justify-center border-t border-t-[color:var(--hero-rail-border-t)] bg-[color:var(--surface)] px-6 py-9 text-[color:var(--foreground)] sm:px-7 lg:w-[clamp(13.25rem,19vw,16.5rem)] lg:shrink-0 lg:self-start lg:border-t-0 lg:border-l lg:border-l-[color:var(--hero-rail-border-l)] lg:px-5 lg:py-10 xl:w-[clamp(13.75rem,17vw,17.25rem)] xl:px-7"
           style={{ boxShadow: "var(--hero-rail-box-shadow)" }}
         >
           <div className="space-y-7 overflow-y-auto lg:space-y-8">
-            <div className="border-b border-[color:var(--border)] pb-7 lg:pb-8">
+            <div className="hero-rail-top-enter border-b border-[color:var(--border)] pb-7 lg:pb-8">
               <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--foreground-muted)]">
                 {t("hero.hours")}
               </h3>
@@ -98,7 +98,7 @@ export function EventHeroBanner() {
               </div>
             ) : null}
 
-            <div>
+            <div className="hero-rail-bottom-enter">
               <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--foreground-muted)]">
                 {t("hero.address")}
               </h3>

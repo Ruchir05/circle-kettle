@@ -6,12 +6,12 @@ import { useCallback, useSyncExternalStore } from "react";
 const STORAGE_KEY = "ck-theme";
 
 function getThemeSnapshot(): "light" | "dark" {
-  if (typeof document === "undefined") return "dark";
-  return document.documentElement.dataset.theme === "light" ? "light" : "dark";
+  if (typeof document === "undefined") return "light";
+  return document.documentElement.dataset.theme === "dark" ? "dark" : "light";
 }
 
 function getServerSnapshot(): "light" | "dark" {
-  return "dark";
+  return "light";
 }
 
 function subscribe(onStoreChange: () => void) {
@@ -23,16 +23,16 @@ function subscribe(onStoreChange: () => void) {
 
 function applyTheme(mode: "light" | "dark") {
   if (mode === "light") {
-    document.documentElement.dataset.theme = "light";
+    delete document.documentElement.dataset.theme;
     try {
       localStorage.setItem(STORAGE_KEY, "light");
     } catch {
       /* ignore */
     }
   } else {
-    delete document.documentElement.dataset.theme;
+    document.documentElement.dataset.theme = "dark";
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      localStorage.setItem(STORAGE_KEY, "dark");
     } catch {
       /* ignore */
     }

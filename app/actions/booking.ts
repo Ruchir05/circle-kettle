@@ -102,19 +102,19 @@ export async function submitBooking(
   if (data.party_size >= 2) {
     const g2 = guestName.safeParse(data.guest_name_2 ?? "");
     if (!g2.success) {
-      return { ok: false, message: "Please enter every guest’s full name (guest 2)." };
+      return { ok: false, message: "Please enter every guest’s name (guest 2)." };
     }
   }
   if (data.party_size >= 3) {
     const g3 = guestName.safeParse(data.guest_name_3 ?? "");
     if (!g3.success) {
-      return { ok: false, message: "Please enter every guest’s full name (guest 3)." };
+      return { ok: false, message: "Please enter every guest’s name (guest 3)." };
     }
   }
   if (data.party_size >= 4) {
     const g4 = guestName.safeParse(data.guest_name_4 ?? "");
     if (!g4.success) {
-      return { ok: false, message: "Please enter every guest’s full name (guest 4)." };
+      return { ok: false, message: "Please enter every guest’s name (guest 4)." };
     }
   }
 
@@ -173,7 +173,7 @@ export async function submitBooking(
     if (msg.includes("guest_names_required")) {
       return {
         ok: false,
-        message: "Please enter every guest’s full name for your party size.",
+        message: "Please enter every guest’s name for your party size.",
       };
     }
     const hint = [error.message, (error as { details?: string }).details]

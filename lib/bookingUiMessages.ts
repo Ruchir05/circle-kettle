@@ -19,10 +19,10 @@ const toZh: Record<string, string> = {
     "该邮箱已有一条预约记录。每位客人仅限预约一次。",
   "One of the coffees you picked just sold out. Adjust quantities or pick another lot.":
     "您选择的咖啡刚刚售罄。请调整数量或更换款式。",
-  "Please enter every guest’s full name for your party size.": "请按人数填写每位客人的全名。",
-  "Please enter every guest’s full name (guest 2).": "请填写第二位客人的全名。",
-  "Please enter every guest’s full name (guest 3).": "请填写第三位客人的全名。",
-  "Please enter every guest’s full name (guest 4).": "请填写第四位客人的全名。",
+  "Please enter every guest’s name for your party size.": "请按人数填写每位客人的姓名。",
+  "Please enter every guest’s name (guest 2).": "请填写第二位客人的姓名。",
+  "Please enter every guest’s name (guest 3).": "请填写第三位客人的姓名。",
+  "Please enter every guest’s name (guest 4).": "请填写第四位客人的姓名。",
 };
 
 /** Best-effort Chinese copy for known server / client booking strings. */

@@ -11,6 +11,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useTransition,
 } from "react";
@@ -58,6 +59,8 @@ export function BookForm() {
   const [cupsDemo, setCupsDemo] = useState(false);
   const [coffeeCupsError, setCoffeeCupsError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const [isInitialReady, setIsInitialReady] = useState(false);
+  const revealRootRef = useRef<HTMLDivElement | null>(null);
 
   const loadLiveAvailability = useCallback(() => {
     startTransition(async () => {
@@ -127,6 +130,8 @@ export function BookForm() {
         setSlots([]);
         setCoffeeCupsError(t("bookForm.slotLoadError"));
         setCupBySlug(null);
+      } finally {
+        setIsInitialReady(true);
       }
     });
   }, [t]);
@@ -134,6 +139,47 @@ export function BookForm() {
   useEffect(() => {
     loadLiveAvailability();
   }, [loadLiveAvailability]);
+
+  useEffect(() => {
+    if (!isInitialReady) return;
+    (window as Window & { __bookInitialReady?: boolean }).__bookInitialReady = true;
+    window.dispatchEvent(new CustomEvent("book:initial-ready"));
+  }, [isInitialReady]);
+
+  useEffect(() => {
+    if (!isInitialReady) return;
+    const root = revealRootRef.current;
+    if (!root) return;
+
+    const nodes = Array.from(
+      root.querySelectorAll<HTMLElement>("[data-book-reveal]"),
+    );
+    nodes.forEach((el, index) => {
+      if (!el.style.getPropertyValue("--book-reveal-delay")) {
+        const explicitDelay = Number(el.dataset.bookDelay ?? "");
+        const delayMs =
+          Number.isFinite(explicitDelay) && explicitDelay >= 0
+            ? explicitDelay
+            : Math.min(index * 60, 760);
+        el.style.setProperty("--book-reveal-delay", `${delayMs}ms`);
+      }
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const target = entry.target as HTMLElement;
+          target.classList.add("book-reveal-visible");
+          observer.unobserve(target);
+        }
+      },
+      { threshold: 0.16, rootMargin: "0px 0px -8% 0px" },
+    );
+
+    nodes.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [isInitialReady, slots, locale]);
 
   /** Keep slot + cup counts in sync when bookings change (e.g. admin delete). */
   useEffect(() => {
@@ -274,15 +320,24 @@ export function BookForm() {
   }, [coffeeRows, coffeeChecked, partySize, cupBySlug, cupsDemo]);
 
   return (
-    <div className="grid gap-12 lg:grid-cols-5">
-      <div className="lg:col-span-2">
-        <h2 className="text-3xl font-semibold tracking-tight text-[color:var(--foreground)]">
+    <div ref={revealRootRef} className="grid gap-12 lg:grid-cols-5">
+      <div className={`${isInitialReady ? "lg:col-span-2" : "lg:col-span-2 opacity-0"}`}>
+        <h2
+          data-book-reveal="left"
+          className="book-reveal-init text-3xl font-semibold tracking-tight text-[color:var(--foreground)]"
+        >
           {t("bookForm.yourVisit")}
         </h2>
-        <p className="mt-4 text-sm leading-relaxed text-[color:var(--foreground-muted)]">
+        <p
+          data-book-reveal="left"
+          className="book-reveal-init mt-4 text-sm leading-relaxed text-[color:var(--foreground-muted)]"
+        >
           {t("bookForm.visitHelp")}
         </p>
-        <div className="mt-8 space-y-3 text-sm text-[color:var(--foreground)]">
+        <div
+          data-book-reveal="left"
+          className="book-reveal-init mt-8 space-y-3 text-sm text-[color:var(--foreground)]"
+        >
           <p>
             <span className="font-medium text-[color:var(--foreground-muted)]">
               {t("bookForm.whenLabel")}
@@ -296,10 +351,9 @@ export function BookForm() {
             <span>{t("bookForm.whereValue")}</span>
           </p>
         </div>
-        {slotsError && <p className="mt-4 text-sm text-amber-800">{slotsError}</p>}
-        {isPending && !slots && (
-          <p className="mt-4 text-sm text-[color:var(--foreground-muted)]">
-            {t("bookForm.loadingSlots")}
+        {slotsError && (
+          <p data-book-reveal="left" className="book-reveal-init mt-4 text-sm text-amber-800">
+            {slotsError}
           </p>
         )}
       </div>
@@ -316,52 +370,74 @@ export function BookForm() {
         />
 
         <fieldset key={POPUP_EVENT_DATE} className="space-y-4">
-          <legend className="text-2xl font-semibold tracking-tight text-[color:var(--foreground)]">
-            {t("bookForm.timeslot")}
-          </legend>
-          {!slots?.length && !isPending && (
-            <p className="text-sm text-[color:var(--foreground-muted)]">{t("bookForm.noSlots")}</p>
-          )}
-          <ul className="space-y-3">
-            {slots?.map((row) => {
-              const disabled = row.remaining <= 0;
-              return (
-                <li key={row.slot_start}>
-                  <label
-                    className={`book-on-light-surface flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-4 text-sm shadow-none transition-colors ${
-                      disabled ? "cursor-not-allowed opacity-50" : "hover:border-[color:var(--foreground)]/20"
-                    }`}
-                  >
-                    <span className="flex items-center gap-3">
-                      <input
-                        type="radio"
-                        name="slot_pick"
-                        value={row.slot_start}
-                        checked={selectedSlot === row.slot_start}
-                        disabled={disabled}
-                        onChange={() => setSelectedSlot(row.slot_start)}
-                      />
-                      <span className="font-medium text-[color:var(--foreground)]">
-                        {formatSlotLabel(row.slot_start)}
-                      </span>
-                    </span>
-                    <span className="text-[color:var(--foreground-muted)]">
-                      {disabled
-                        ? t("bookForm.full")
-                        : t("bookForm.spots", {
-                            remaining: row.remaining,
-                            capacity: row.capacity,
-                          })}
-                    </span>
-                  </label>
-                </li>
-              );
-            })}
-          </ul>
+          {isInitialReady ? (
+            <>
+              <legend
+                data-book-reveal="up"
+                className="book-reveal-init text-2xl font-semibold tracking-tight text-[color:var(--foreground)]"
+              >
+                {t("bookForm.timeslot")}
+              </legend>
+              {!slots?.length && !isPending && (
+                <p
+                  data-book-reveal="up"
+                  className="book-reveal-init text-sm text-[color:var(--foreground-muted)]"
+                >
+                  {t("bookForm.noSlots")}
+                </p>
+              )}
+              <ul className="space-y-3">
+                {slots?.map((row, index) => {
+                  const disabled = row.remaining <= 0;
+                  return (
+                    <li
+                      key={row.slot_start}
+                      data-book-reveal="up"
+                      data-book-delay={90 + index * 50}
+                      className="book-reveal-init"
+                    >
+                      <label
+                        className={`book-on-light-surface flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-4 text-sm shadow-none transition-colors ${
+                          disabled
+                            ? "cursor-not-allowed opacity-50"
+                            : "hover:border-[color:var(--foreground)]/20"
+                        }`}
+                      >
+                        <span className="flex items-center gap-3">
+                          <input
+                            type="radio"
+                            name="slot_pick"
+                            value={row.slot_start}
+                            checked={selectedSlot === row.slot_start}
+                            disabled={disabled}
+                            onChange={() => setSelectedSlot(row.slot_start)}
+                          />
+                          <span className="font-medium text-[color:var(--foreground)]">
+                            {formatSlotLabel(row.slot_start)}
+                          </span>
+                        </span>
+                        <span className="text-[color:var(--foreground-muted)]">
+                          {disabled
+                            ? t("bookForm.full")
+                            : t("bookForm.spots", {
+                                remaining: row.remaining,
+                                capacity: row.capacity,
+                              })}
+                        </span>
+                      </label>
+                    </li>
+                  );
+                })}
+              </ul>
+            </>
+          ) : null}
         </fieldset>
 
         <div className="grid gap-6 sm:grid-cols-2">
-          <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
+          <label
+            data-book-reveal="up"
+            className="book-reveal-init block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]"
+          >
             {t("bookForm.partySize")}
             <select
               name="party_size"
@@ -378,7 +454,7 @@ export function BookForm() {
             </select>
           </label>
 
-          <fieldset className="sm:col-span-2">
+          <fieldset data-book-reveal="up" className="book-reveal-init sm:col-span-2">
             <legend className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
               {t("bookForm.coffeeChoice")}
             </legend>
@@ -404,7 +480,8 @@ export function BookForm() {
                 return (
                   <li
                     key={row.slug}
-                    className={`book-on-light-surface flex flex-wrap items-center gap-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3 text-sm sm:flex-nowrap sm:justify-between ${
+                    data-book-reveal="up"
+                    className={`book-reveal-init book-on-light-surface flex flex-wrap items-center gap-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3 text-sm sm:flex-nowrap sm:justify-between ${
                       soldOut ? "opacity-50" : ""
                     }`}
                   >
@@ -479,11 +556,11 @@ export function BookForm() {
         </div>
 
         <div className="grid gap-6">
-          <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-            {t("bookForm.name")}
-            <span className="mt-1 block text-[0.65rem] font-normal normal-case tracking-normal text-[color:var(--foreground-muted)]">
-              {t("bookForm.leadGuestHint")}
-            </span>
+          <label
+            data-book-reveal="up"
+            className="book-reveal-init block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]"
+          >
+            {partySize === 1 ? t("bookForm.name") : t("bookForm.guest1")}
             <input
               name="name"
               required
@@ -494,7 +571,10 @@ export function BookForm() {
             />
           </label>
           {partySize >= 2 ? (
-            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
+            <label
+              data-book-reveal="up"
+              className="book-reveal-init block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]"
+            >
               {t("bookForm.guest2")}
               <input
                 name="guest_name_2"
@@ -507,7 +587,10 @@ export function BookForm() {
             </label>
           ) : null}
           {partySize >= 3 ? (
-            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
+            <label
+              data-book-reveal="up"
+              className="book-reveal-init block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]"
+            >
               {t("bookForm.guest3")}
               <input
                 name="guest_name_3"
@@ -520,7 +603,10 @@ export function BookForm() {
             </label>
           ) : null}
           {partySize >= 4 ? (
-            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
+            <label
+              data-book-reveal="up"
+              className="book-reveal-init block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]"
+            >
               {t("bookForm.guest4")}
               <input
                 name="guest_name_4"
@@ -532,7 +618,10 @@ export function BookForm() {
               />
             </label>
           ) : null}
-          <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
+          <label
+            data-book-reveal="up"
+            className="book-reveal-init block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]"
+          >
             {t("bookForm.email")}
             <input
               name="email"
@@ -544,7 +633,10 @@ export function BookForm() {
               onChange={(e) => setEmail(e.target.value)}
             />
           </label>
-          <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
+          <label
+            data-book-reveal="up"
+            className="book-reveal-init block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]"
+          >
             {t("bookForm.phone")}{" "}
             <span className="font-normal normal-case text-[color:var(--foreground-muted)]">
               {t("bookForm.optional")}
@@ -557,7 +649,10 @@ export function BookForm() {
               onChange={(e) => setPhone(e.target.value)}
             />
           </label>
-          <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
+          <label
+            data-book-reveal="up"
+            className="book-reveal-init block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]"
+          >
             {t("bookForm.notes")}{" "}
             <span className="font-normal normal-case text-[color:var(--foreground-muted)]">
               {t("bookForm.optional")}
@@ -572,30 +667,36 @@ export function BookForm() {
           </label>
         </div>
 
-        <p className="text-xs leading-relaxed text-[color:var(--foreground-muted)]">
+        <p
+          data-book-reveal="up"
+          className="book-reveal-init text-xs leading-relaxed text-[color:var(--foreground-muted)]"
+        >
           {t("bookForm.privacy")}
         </p>
 
         {state.message && (
           <p
+            data-book-reveal="up"
             role={state.ok ? "status" : "alert"}
-            className={`text-sm ${state.ok ? "text-emerald-800" : "text-amber-800"}`}
+            className={`book-reveal-init text-sm ${state.ok ? "text-emerald-800" : "text-amber-800"}`}
           >
             {translateBookingUiMessage(state.message, locale)}
           </p>
         )}
 
-        <SubmitButton
-          pending={isSubmitPending}
-          disabled={
-            isPending ||
-            !slots?.length ||
-            !slots.some((row) => row.remaining > 0) ||
-            !selectedSlot.trim() ||
-            !coffeeChoiceValid ||
-            !qtyWithinParty
-          }
-        />
+        <div data-book-reveal="up" className="book-reveal-init">
+          <SubmitButton
+            pending={isSubmitPending}
+            disabled={
+              isPending ||
+              !slots?.length ||
+              !slots.some((row) => row.remaining > 0) ||
+              !selectedSlot.trim() ||
+              !coffeeChoiceValid ||
+              !qtyWithinParty
+            }
+          />
+        </div>
       </form>
     </div>
   );

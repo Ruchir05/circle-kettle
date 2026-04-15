@@ -36,7 +36,7 @@ export default function RootLayout({
           suppressHydrationWarning
           dangerouslySetInnerHTML={{
             __html:
-              "try{var t=localStorage.getItem('ck-theme');if(t==='light')document.documentElement.dataset.theme='light';}catch(e){}",
+              "try{var t=localStorage.getItem('ck-theme');if(t==='dark')document.documentElement.dataset.theme='dark';else delete document.documentElement.dataset.theme;}catch(e){}",
           }}
         />
         <script
