@@ -195,10 +195,7 @@ export function BookForm() {
     };
   }, [loadLiveAvailability]);
 
-  const coffeeRows = useMemo(
-    () => getCoffeeRowsForBookingForm(locale, t("bookForm.priceSuffix")),
-    [locale, t],
-  );
+  const coffeeRows = useMemo(() => getCoffeeRowsForBookingForm(locale), [locale]);
 
   useEffect(() => {
     if (!cupBySlug || cupsDemo) return;

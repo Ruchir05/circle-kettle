@@ -10,13 +10,19 @@ export const messages = {
     home: {
       calmTitle: "Calm space, clear flavors",
       calmBody:
-        "Editorial layouts and generous margins keep the focus on what is in the cup—similar spirit to the quiet confidence of a well-made storefront site, without borrowing anyone else's identity.",
+        "We keep things simple so the coffee speaks for itself. No distractions—just clear, expressive cups.",
     },
     hero: {
       kicker: "One day only · UIUC",
-      title: "Coffee, unhurried. A thirty-minute table for up to four.",
-      lead:
-        "We brew a focused menu of single-origin lots—bright, balanced, and bold—so you can taste with a little guidance and a lot of room to talk. Book a slot, pick what you want in the cup, and we will meet you there.",
+      title: "Black Coffee, Done Right.",
+      lead: `Black coffee? Bitter, strong, and harsh?
+
+Think again.
+
+Floral. Fruity. Naturally sweet—
+nothing added.
+
+Don’t believe us? Come try.`,
       bookCta: "Book a tasting",
       hours: "Hours",
       contact: "Contact",
@@ -107,13 +113,19 @@ export const messages = {
     home: {
       calmTitle: "安静空间，风味清晰",
       calmBody:
-        "版式留白把视线留在杯中——像一家用心的小店网站那样克制、自信，但不借用任何人的身份。",
+        "我们把一切保持简单，让咖啡自己说话。没有干扰——只有清晰、富有表达力的风味。",
     },
     hero: {
       kicker: "仅一天 · UIUC",
       title: "咖啡，慢慢来。最多四人的三十分钟小桌。",
-      lead:
-        "我们精选单一产区豆单——明亮、平衡、也有力量感——让你有一点引导，也有足够空间聊天。预约时段，选好你想喝的，我们在桌前见。",
+      lead: `黑咖啡？又苦、又冲、又涩？
+
+再想想。
+
+花香、果香、自然回甘—
+不加任何东西。
+
+不信？来试试。`,
       bookCta: "预约品鉴",
       hours: "时间",
       contact: "联系",

@@ -215,7 +215,7 @@ export function HomeBeanShowcase() {
               />
             </div>
 
-            <p className="mt-6 text-base leading-relaxed">{panelCoffee.longNotes}</p>
+            <p className="mt-6 whitespace-pre-line text-base leading-relaxed">{panelCoffee.longNotes}</p>
 
             {(panelCoffee.origin ||
               panelCoffee.variety ||

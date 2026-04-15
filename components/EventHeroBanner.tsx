@@ -41,7 +41,7 @@ export function EventHeroBanner() {
                   {t("hero.title")}
                 </h1>
 
-                <p className="mt-8 text-base leading-relaxed text-[color:var(--hero-text-muted)] sm:text-lg">
+                <p className="mt-8 whitespace-pre-line text-base leading-relaxed text-[color:var(--hero-text-muted)] sm:text-lg">
                   {t("hero.lead")}
                 </p>
               </div>

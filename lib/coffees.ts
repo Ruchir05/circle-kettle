@@ -15,6 +15,7 @@ export type Coffee = {
   subtitle?: string;
   shortNotes: string;
   longNotes: string;
+  priceUsd: number;
   origin?: string;
   variety?: string;
   producer?: string;
@@ -25,7 +26,7 @@ export type Coffee = {
 
 const list = coffeesData as Coffee[];
 
-type CoffeeZhFields = Omit<Coffee, "slug" | "image">;
+type CoffeeZhFields = Omit<Coffee, "slug" | "image" | "priceUsd">;
 const zhBySlug = coffeeLocaleZh as Record<string, CoffeeZhFields>;
 
 function localizeCoffee(base: Coffee, locale: Locale): Coffee {
@@ -146,12 +147,9 @@ export function isValidCoffeeChoiceField(value: string): boolean {
 export type BookingCoffeeRow = { slug: string; label: string };
 
 /** Catalog rows for the booking form (name without pouch suffix + price). */
-export function getCoffeeRowsForBookingForm(
-  locale: Locale,
-  priceSuffix: string,
-): BookingCoffeeRow[] {
+export function getCoffeeRowsForBookingForm(locale: Locale): BookingCoffeeRow[] {
   return getCoffees(locale).map((c) => ({
     slug: c.slug,
-    label: `${c.name} ${priceSuffix}`.trim(),
+    label: `${c.name} ${c.priceUsd} ${locale === "zh" ? "美元" : "USD"}`.trim(),
   }));
 }
