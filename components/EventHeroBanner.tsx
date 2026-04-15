@@ -12,6 +12,9 @@ export function EventHeroBanner() {
   const { locale, t } = useI18n();
   const schedule = getPopupScheduleLinesForLocale(locale);
   const phone = getContactPhoneDisplay();
+  const scrollToBeans = () => {
+    document.getElementById("beans")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
 
   return (
     <section
@@ -44,6 +47,13 @@ export function EventHeroBanner() {
                 <p className="mt-8 whitespace-pre-line text-base leading-relaxed text-[color:var(--hero-text-muted)] sm:text-lg">
                   {t("hero.lead")}
                 </p>
+                <button
+                  type="button"
+                  onClick={scrollToBeans}
+                  className="mt-5 text-sm font-medium text-[color:var(--hero-text)] decoration-[color:var(--hero-link-decoration)] no-underline underline-offset-[5px] transition-colors hover:underline hover:decoration-[color:var(--hero-link-hover-decoration)]"
+                >
+                  {t("hero.exploreCoffees")}
+                </button>
               </div>
             </div>
 

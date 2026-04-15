@@ -61,6 +61,18 @@ export function BookForm() {
   const [isPending, startTransition] = useTransition();
   const [isInitialReady, setIsInitialReady] = useState(false);
   const revealRootRef = useRef<HTMLDivElement | null>(null);
+  const [partySize, setPartySize] = useState(2);
+  const [coffeeChecked, setCoffeeChecked] = useState<Record<string, boolean>>({});
+  const [coffeeQty, setCoffeeQty] = useState<Record<string, number>>({});
+  /** Controlled so the chosen slot survives re-renders after a server action and is always posted as `slot_start`. */
+  const [selectedSlot, setSelectedSlot] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [notes, setNotes] = useState("");
+  const [guest2, setGuest2] = useState("");
+  const [guest3, setGuest3] = useState("");
+  const [guest4, setGuest4] = useState("");
 
   const loadLiveAvailability = useCallback(() => {
     startTransition(async () => {
@@ -179,7 +191,7 @@ export function BookForm() {
 
     nodes.forEach((el) => observer.observe(el));
     return () => observer.disconnect();
-  }, [isInitialReady, slots, locale]);
+  }, [isInitialReady, slots, locale, partySize]);
 
   /** Keep slot + cup counts in sync when bookings change (e.g. admin delete). */
   useEffect(() => {
@@ -226,19 +238,6 @@ export function BookForm() {
       return changed ? next : q;
     });
   }, [cupBySlug, cupsDemo]);
-
-  const [partySize, setPartySize] = useState(2);
-  const [coffeeChecked, setCoffeeChecked] = useState<Record<string, boolean>>({});
-  const [coffeeQty, setCoffeeQty] = useState<Record<string, number>>({});
-  /** Controlled so the chosen slot survives re-renders after a server action and is always posted as `slot_start`. */
-  const [selectedSlot, setSelectedSlot] = useState("");
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [notes, setNotes] = useState("");
-  const [guest2, setGuest2] = useState("");
-  const [guest3, setGuest3] = useState("");
-  const [guest4, setGuest4] = useState("");
 
   useEffect(() => {
     setCoffeeChecked({});

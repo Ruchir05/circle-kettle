@@ -25,7 +25,7 @@ export function getPopupScheduleLines(): PopupScheduleLines {
     return {
       dateLine: "Saturday, April 18, 2026",
       timeLine: "1:00 PM–5:00 PM Central",
-      reservationNote: "30-minute reservations · up to 4 guests",
+      reservationNote: "30-minute reservations, up to 4 guests",
     };
   }
 
@@ -49,6 +49,6 @@ export function getPopupScheduleLines(): PopupScheduleLines {
   return {
     dateLine,
     timeLine,
-    reservationNote: "30-minute reservations · up to 4 guests",
+    reservationNote: "30-minute reservations, up to 4 guests",
   };
 }

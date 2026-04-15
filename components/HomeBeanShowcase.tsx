@@ -326,6 +326,23 @@ export function HomeBeanShowcase() {
                         {soldOut ? t("beans.soldOut") : t("beans.cupsLeft", { count: remaining })}
                       </span>
                     ) : null}
+                    <span
+                      aria-hidden
+                      className="pointer-events-auto absolute right-4 bottom-4 inline-flex cursor-pointer items-center gap-1.5 text-white/80 transition-colors duration-200 group-hover:text-white"
+                    >
+                      <span className="text-[0.66rem] font-medium uppercase tracking-[0.1em] decoration-current no-underline underline-offset-3 hover:underline">
+                        {t("beans.moreDetails")}
+                      </span>
+                      <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M3.25 8h8.5M8.5 3.75L12.75 8 8.5 12.25"
+                          stroke="currentColor"
+                          strokeWidth="1.5"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    </span>
                   </span>
                 </span>
               </button>

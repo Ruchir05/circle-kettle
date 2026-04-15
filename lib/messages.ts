@@ -14,16 +14,15 @@ export const messages = {
     },
     hero: {
       kicker: "One day only · UIUC",
-      title: "Black Coffee, Done Right.",
-      lead: `Black coffee? Bitter, strong, and harsh?
-
-Think again.
+      title: "Black Coffee, Reimagined.",
+      lead: `Forget what you know about typical black coffee.
 
 Floral. Fruity. Naturally sweet—
 nothing added.
 
-Don’t believe us? Come try.`,
+Come taste the difference.`,
       bookCta: "Book a tasting",
+      exploreCoffees: "Explore our coffees",
       hours: "Hours",
       contact: "Contact",
       address: "Address",
@@ -35,6 +34,7 @@ Don’t believe us? Come try.`,
     },
     beans: {
       listLabel: "Featured coffees",
+      moreDetails: "More details",
       closeDetails: "Close coffee details",
       close: "Close",
       origin: "Origin",
@@ -127,6 +127,7 @@ Don’t believe us? Come try.`,
 
 不信？来试试。`,
       bookCta: "预约品鉴",
+      exploreCoffees: "探索我们的咖啡",
       hours: "时间",
       contact: "联系",
       address: "地址",
@@ -138,6 +139,7 @@ Don’t believe us? Come try.`,
     },
     beans: {
       listLabel: "精选咖啡",
+      moreDetails: "更多详情",
       closeDetails: "关闭咖啡详情",
       close: "关闭",
       origin: "产地",
