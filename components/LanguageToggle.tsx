@@ -13,7 +13,7 @@ export function LanguageToggle() {
       type="button"
       onClick={() => setLocale(next)}
       aria-label={locale === "en" ? t("language.ariaToZh") : t("language.ariaToEn")}
-      className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium text-[color:var(--foreground-muted)] decoration-[color:var(--border)] underline-offset-[6px] transition-colors hover:text-[color:var(--foreground)] hover:underline"
+      className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium text-[color:var(--foreground-muted)] underline-offset-4 transition-colors hover:text-[color:var(--foreground)] hover:underline"
       suppressHydrationWarning
     >
       {visibleLabel}

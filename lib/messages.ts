@@ -7,12 +7,6 @@ export const messages = {
       ariaToZh: "Switch site language to Chinese",
       ariaToEn: "Switch site language to English",
     },
-    footer: {
-      addressLine: "1004 W Main Street · Urbana, IL 61801 · Unit 204",
-      addressLine1: "1004 W Main Street",
-      addressLine2: "Urbana, IL 61801",
-      addressLine3: "Unit 204",
-    },
     home: {
       calmTitle: "Calm space, clear flavors",
       calmBody:
@@ -95,12 +89,6 @@ export const messages = {
       ariaToZh: "切换为中文",
       ariaToEn: "切换为英文",
     },
-    footer: {
-      addressLine: "伊利诺伊州厄巴纳市西主街1004号 · 61801 · 204单元",
-      addressLine1: "西主街1004号",
-      addressLine2: "伊利诺伊州厄巴纳市，61801",
-      addressLine3: "204单元",
-    },
     home: {
       calmTitle: "安静空间，风味清晰",
       calmBody:
@@ -136,7 +124,7 @@ export const messages = {
       title: "预约品鉴",
       intro:
         "2026年4月18日 · 下午1:00–5:00，地点 {address}。选择半小时时段，最多四人，并选一款咖啡——或选择「不确定」，我们会为这一桌搭配合适的出品。",
-      introAddress: "伊利诺伊州厄巴纳市西主街1004号，61801，204单元",
+      introAddress: "1004 W Main Street, Urbana, IL 61801, Unit 204",
     },
     bookForm: {
       yourVisit: "你的到访",
@@ -144,7 +132,7 @@ export const messages = {
       whenLabel: "时间 ·",
       whereLabel: "地点 ·",
       whenValue: "2026年4月18日 · 下午1:00–5:00（美中时间）",
-      whereValue: "伊利诺伊州厄巴纳市西主街1004号，61801，204单元",
+      whereValue: "1004 W Main Street, Urbana, IL 61801, Unit 204",
       loadingSlots: "加载中…",
       timeslot: "时段",
       noSlots: "目前没有可预约时段，请稍后再试。",

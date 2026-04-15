@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { CoffeePlantGraphic } from "@/components/CoffeePlantGraphic";
-import { getContactPhoneDisplay } from "@/lib/config";
+import { getContactPhoneDisplay, POPUP_VENUE_ADDRESS_LINES } from "@/lib/config";
 import { useI18n } from "@/lib/i18n";
 import { getPopupScheduleLinesForLocale } from "@/lib/popupDisplay";
 
@@ -11,8 +11,6 @@ const heroLinkClass =
 
 /** ~10% wider than max-w-xl (36rem). */
 const copyMax = "max-w-[40rem]";
-
-const footerAddressKeys = ["footer.addressLine1", "footer.addressLine2", "footer.addressLine3"] as const;
 
 export function EventHeroBanner() {
   const { locale, t } = useI18n();
@@ -115,9 +113,9 @@ export function EventHeroBanner() {
                 {t("hero.address")}
               </h3>
               <p className="mt-3 text-sm leading-snug text-[color:var(--foreground)]">
-                {footerAddressKeys.map((key) => (
-                  <span key={key} className="block">
-                    {t(key)}
+                {POPUP_VENUE_ADDRESS_LINES.map((line) => (
+                  <span key={line} className="block">
+                    {line}
                   </span>
                 ))}
               </p>
