@@ -8,6 +8,37 @@
   --border: rgba(31, 31, 31, 0.1);
   --accent: #8b6a55;
   --accent-foreground: #fbf9f6;
+
+  /* Hero (default: charcoal). Light mode uses old-branch cream + ink via [data-theme="light"]. */
+  --hero-bg: #2c2c2c;
+  --hero-text: #ffffff;
+  --hero-heading: rgba(255, 255, 255, 0.88);
+  --hero-text-muted: rgba(255, 255, 255, 0.72);
+  --hero-kicker: rgba(255, 255, 255, 0.55);
+  --hero-link: #ffffff;
+  --hero-link-decoration: rgba(255, 255, 255, 0.35);
+  --hero-link-hover-decoration: rgba(255, 255, 255, 0.55);
+  --hero-rail-border-t: rgba(255, 255, 255, 0.08);
+  --hero-rail-border-l: rgba(255, 255, 255, 0.06);
+  --hero-rail-box-shadow: -1px 0 0 rgba(255, 255, 255, 0.06);
+  --plant-graphic: #ffffff;
+  --plant-graphic-filter: drop-shadow(0 16px 40px rgba(0, 0, 0, 0.35));
+}
+
+html[data-theme="light"] {
+  --hero-bg: #f6f3ee;
+  --hero-text: #1f1f1f;
+  --hero-heading: rgba(31, 31, 31, 0.52);
+  --hero-text-muted: rgba(31, 31, 31, 0.62);
+  --hero-kicker: rgba(31, 31, 31, 0.48);
+  --hero-link: #1f1f1f;
+  --hero-link-decoration: rgba(31, 31, 31, 0.22);
+  --hero-link-hover-decoration: rgba(31, 31, 31, 0.45);
+  --hero-rail-border-t: rgba(31, 31, 31, 0.1);
+  --hero-rail-border-l: rgba(31, 31, 31, 0.1);
+  --hero-rail-box-shadow: -1px 0 0 rgba(31, 31, 31, 0.06);
+  --plant-graphic: #5c3d2e;
+  --plant-graphic-filter: drop-shadow(0 14px 36px rgba(61, 42, 31, 0.16));
 }
 
 @theme inline {
@@ -52,6 +83,20 @@ body {
 .coffee-plant-motion {
   animation: coffee-plant-drift 12s ease-in-out infinite;
   will-change: transform;
+}
+
+.coffee-plant-graphic-svg {
+  color: var(--plant-graphic);
+  filter: var(--plant-graphic-filter);
+}
+
+.hero-inline-link {
+  color: var(--hero-link);
+  text-decoration-color: var(--hero-link-decoration);
+}
+
+.hero-inline-link:hover {
+  text-decoration-color: var(--hero-link-hover-decoration);
 }
 
 /* Hero cream rail: 90% of inset height (inset ≈ viewport minus section bottom padding). */

@@ -28,8 +28,16 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${dmSans.variable} h-full scroll-smooth antialiased`}
+      suppressHydrationWarning
     >
       <body className="min-h-full flex flex-col bg-[color:var(--background)] text-[color:var(--foreground)]">
+        <script
+          suppressHydrationWarning
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{var t=localStorage.getItem('ck-theme');if(t==='light')document.documentElement.dataset.theme='light';}catch(e){}",
+          }}
+        />
         <SiteHeader />
         <div className="flex-1">{children}</div>
         <SiteFooter />
