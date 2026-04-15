@@ -1,8 +1,10 @@
 "use client";
 
-import { getContactPhoneDisplay, POPUP_VENUE_ADDRESS_LINES } from "@/lib/config";
+import { getContactPhoneDisplay } from "@/lib/config";
 import { useI18n } from "@/lib/i18n";
 import { getPopupScheduleLinesForLocale } from "@/lib/popupDisplay";
+
+const footerAddressKeys = ["footer.addressLine1", "footer.addressLine2", "footer.addressLine3"] as const;
 
 /**
  * Bottom-of-page visit summary (duplicates hero rail info for scrollers).
@@ -45,9 +47,9 @@ export function HomeVisitBlock() {
         {t("visitBlock.address")}
       </h3>
       <p className="mt-3 text-sm leading-relaxed text-[color:var(--foreground)]">
-        {POPUP_VENUE_ADDRESS_LINES.map((line) => (
-          <span key={line} className="block">
-            {line}
+        {footerAddressKeys.map((key) => (
+          <span key={key} className="block">
+            {t(key)}
           </span>
         ))}
       </p>

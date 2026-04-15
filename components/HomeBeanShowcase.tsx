@@ -1,15 +1,19 @@
 "use client";
 
 import type { Coffee } from "@/lib/coffees";
+import { getCoffeeForDisplay, getCoffees } from "@/lib/coffees";
 import { useI18n } from "@/lib/i18n";
-import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
-type Props = { coffees: Coffee[] };
-
-export function HomeBeanShowcase({ coffees }: Props) {
-  const { t } = useI18n();
-  const [detail, setDetail] = useState<Coffee | null>(null);
+export function HomeBeanShowcase() {
+  const { locale, t } = useI18n();
+  const coffees = useMemo(() => getCoffees(locale), [locale]);
+  const [selectedSlug, setSelectedSlug] = useState<string | null>(null);
+  const panelCoffee = useMemo(
+    () => (selectedSlug ? getCoffeeForDisplay(selectedSlug, locale) : null),
+    [selectedSlug, locale],
+  );
   const [drawerOpen, setDrawerOpen] = useState(false);
   const titleId = useId();
   const descId = useId();
@@ -27,7 +31,7 @@ export function HomeBeanShowcase({ coffees }: Props) {
       clearTimeout(closeTimerRef.current);
       closeTimerRef.current = null;
     }
-    setDetail(coffee);
+    setSelectedSlug(coffee.slug);
     const instant =
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -52,13 +56,13 @@ export function HomeBeanShowcase({ coffees }: Props) {
       typeof window !== "undefined" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (instant) {
-      setDetail(null);
+      setSelectedSlug(null);
       return;
     }
 
     closeTimerRef.current = window.setTimeout(() => {
       closeTimerRef.current = null;
-      setDetail(null);
+      setSelectedSlug(null);
     }, 780);
   }, []);
 
@@ -70,11 +74,11 @@ export function HomeBeanShowcase({ coffees }: Props) {
       clearTimeout(closeTimerRef.current);
       closeTimerRef.current = null;
     }
-    setDetail(null);
+    setSelectedSlug(null);
   }, []);
 
   useEffect(() => {
-    if (!detail) return;
+    if (!panelCoffee) return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") closePanel();
     };
@@ -84,17 +88,17 @@ export function HomeBeanShowcase({ coffees }: Props) {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [detail, closePanel]);
+  }, [panelCoffee, closePanel]);
 
   useEffect(() => {
-    if (!detail || !drawerOpen) return;
+    if (!panelCoffee || !drawerOpen) return;
     closeBtnRef.current?.focus();
-  }, [detail, drawerOpen]);
+  }, [panelCoffee, drawerOpen]);
 
   const portalTarget = typeof document !== "undefined" ? document.body : null;
 
   const overlay =
-    detail && portalTarget ? (
+    panelCoffee && portalTarget ? (
       <div
         className={`fixed inset-0 z-[100] min-h-[100dvh] ${drawerOpen ? "pointer-events-auto" : "pointer-events-none"}`}
         role="presentation"
@@ -121,7 +125,7 @@ export function HomeBeanShowcase({ coffees }: Props) {
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain p-6 sm:p-8">
             <div className="flex shrink-0 items-start justify-between gap-4">
               <h2 id={titleId} className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                {detail.name}
+                {panelCoffee.name}
               </h2>
               <button
                 ref={closeBtnRef}
@@ -132,19 +136,19 @@ export function HomeBeanShowcase({ coffees }: Props) {
                 {t("beans.close")}
               </button>
             </div>
-            {detail.subtitle ? (
+            {panelCoffee.subtitle ? (
               <p className="mt-1 shrink-0 text-xs font-medium uppercase tracking-[0.14em] text-[color:var(--foreground-muted)]">
-                {detail.subtitle}
+                {panelCoffee.subtitle}
               </p>
             ) : null}
             <p id={descId} className="mt-2 shrink-0 text-sm text-[color:var(--foreground-muted)]">
-              {detail.shortNotes}
+              {panelCoffee.shortNotes}
             </p>
 
             <div className="mt-6 shrink-0 overflow-hidden border border-[color:var(--border)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
-                src={detail.image}
+                src={panelCoffee.image}
                 alt=""
                 width={800}
                 height={600}
@@ -152,52 +156,52 @@ export function HomeBeanShowcase({ coffees }: Props) {
               />
             </div>
 
-            <p className="mt-6 text-base leading-relaxed">{detail.longNotes}</p>
+            <p className="mt-6 text-base leading-relaxed">{panelCoffee.longNotes}</p>
 
-            {(detail.origin ||
-              detail.variety ||
-              detail.producer ||
-              detail.elevation ||
-              detail.process) && (
+            {(panelCoffee.origin ||
+              panelCoffee.variety ||
+              panelCoffee.producer ||
+              panelCoffee.elevation ||
+              panelCoffee.process) && (
               <dl className="mt-8 grid shrink-0 gap-6 border-t border-[color:var(--border)] pt-6">
-                {detail.origin && (
+                {panelCoffee.origin && (
                   <div>
                     <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
                       {t("beans.origin")}
                     </dt>
-                    <dd className="mt-2 text-sm">{detail.origin}</dd>
+                    <dd className="mt-2 text-sm">{panelCoffee.origin}</dd>
                   </div>
                 )}
-                {detail.variety && (
+                {panelCoffee.variety && (
                   <div>
                     <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
                       {t("beans.variety")}
                     </dt>
-                    <dd className="mt-2 text-sm">{detail.variety}</dd>
+                    <dd className="mt-2 text-sm">{panelCoffee.variety}</dd>
                   </div>
                 )}
-                {detail.producer && (
+                {panelCoffee.producer && (
                   <div>
                     <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
                       {t("beans.producer")}
                     </dt>
-                    <dd className="mt-2 text-sm">{detail.producer}</dd>
+                    <dd className="mt-2 text-sm">{panelCoffee.producer}</dd>
                   </div>
                 )}
-                {detail.elevation && (
+                {panelCoffee.elevation && (
                   <div>
                     <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
                       {t("beans.elevation")}
                     </dt>
-                    <dd className="mt-2 text-sm">{detail.elevation}</dd>
+                    <dd className="mt-2 text-sm">{panelCoffee.elevation}</dd>
                   </div>
                 )}
-                {detail.process && (
+                {panelCoffee.process && (
                   <div>
                     <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
                       {t("beans.process")}
                     </dt>
-                    <dd className="mt-2 text-sm leading-relaxed">{detail.process}</dd>
+                    <dd className="mt-2 text-sm leading-relaxed">{panelCoffee.process}</dd>
                   </div>
                 )}
               </dl>

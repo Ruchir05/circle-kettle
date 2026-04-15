@@ -3,11 +3,8 @@ import { HomeBeanShowcase } from "@/components/HomeBeanShowcase";
 import { HomePhilosophy } from "@/components/HomePhilosophy";
 import { HomeVisitBlock } from "@/components/HomeVisitBlock";
 import { ScrollReveal } from "@/components/ScrollReveal";
-import { getCoffees } from "@/lib/coffees";
 
 export default function Home() {
-  const coffees = getCoffees();
-
   return (
     <main className="overflow-x-hidden">
       <EventHeroBanner />
@@ -23,7 +20,7 @@ export default function Home() {
             direction="from-right"
             className="mt-12 w-full border-t border-[color:var(--border)] pt-12 sm:mt-16 sm:pt-16"
           >
-            <HomeBeanShowcase coffees={coffees} />
+            <HomeBeanShowcase />
           </ScrollReveal>
 
           <ScrollReveal direction="from-left" className="mt-12 w-full sm:mt-16">

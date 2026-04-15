@@ -3,7 +3,16 @@ export type Locale = "en" | "zh";
 export const messages = {
   en: {
     nav: { bookTasting: "Book a tasting" },
-    language: { en: "ENG", zh: "中文", label: "Language" },
+    language: {
+      ariaToZh: "Switch site language to Chinese",
+      ariaToEn: "Switch site language to English",
+    },
+    footer: {
+      addressLine: "1004 W Main Street · Urbana, IL 61801 · Unit 204",
+      addressLine1: "1004 W Main Street",
+      addressLine2: "Urbana, IL 61801",
+      addressLine3: "Unit 204",
+    },
     home: {
       calmTitle: "Calm space, clear flavors",
       calmBody:
@@ -82,7 +91,16 @@ export const messages = {
   },
   zh: {
     nav: { bookTasting: "预约品鉴" },
-    language: { en: "ENG", zh: "中文", label: "语言" },
+    language: {
+      ariaToZh: "切换为中文",
+      ariaToEn: "切换为英文",
+    },
+    footer: {
+      addressLine: "伊利诺伊州厄巴纳市西主街1004号 · 61801 · 204单元",
+      addressLine1: "西主街1004号",
+      addressLine2: "伊利诺伊州厄巴纳市，61801",
+      addressLine3: "204单元",
+    },
     home: {
       calmTitle: "安静空间，风味清晰",
       calmBody:

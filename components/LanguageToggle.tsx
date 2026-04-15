@@ -3,36 +3,20 @@
 import { useI18n } from "@/lib/i18n";
 import type { Locale } from "@/lib/messages";
 
-const locales: Locale[] = ["en", "zh"];
-
 export function LanguageToggle() {
   const { locale, setLocale, t } = useI18n();
+  const next: Locale = locale === "en" ? "zh" : "en";
+  const visibleLabel = locale === "en" ? "中文" : "ENG";
 
   return (
-    <div
-      role="group"
-      aria-label={t("language.label")}
-      className="inline-flex h-9 shrink-0 items-center overflow-hidden rounded-full border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--foreground)] shadow-sm"
+    <button
+      type="button"
+      onClick={() => setLocale(next)}
+      aria-label={locale === "en" ? t("language.ariaToZh") : t("language.ariaToEn")}
+      className="shrink-0 rounded-full px-3 py-1.5 text-sm font-medium text-[color:var(--foreground-muted)] decoration-[color:var(--border)] underline-offset-[6px] transition-colors hover:text-[color:var(--foreground)] hover:underline"
       suppressHydrationWarning
     >
-      {locales.map((id) => {
-        const active = locale === id;
-        return (
-          <button
-            key={id}
-            type="button"
-            onClick={() => setLocale(id)}
-            aria-pressed={active}
-            className={`px-2.5 text-xs font-semibold tracking-tight transition-colors sm:px-3 ${
-              active
-                ? "bg-[color:var(--foreground)] text-[color:var(--background)]"
-                : "text-[color:var(--foreground-muted)] hover:text-[color:var(--foreground)]"
-            }`}
-          >
-            {t(`language.${id}`)}
-          </button>
-        );
-      })}
-    </div>
+      {visibleLabel}
+    </button>
   );
 }

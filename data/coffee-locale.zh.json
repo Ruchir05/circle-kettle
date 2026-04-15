@@ -1,0 +1,31 @@
+{
+  "flower-touch-7": {
+    "name": "FLOWER TOUCH — 7",
+    "subtitle": "瑰夏 · 巴拿马",
+    "shortNotes": "紫藤 · 葡萄 · 桃子",
+    "longNotes": "来自帕索安乔的一支明亮瑰夏：层次丰富的花香、成熟核果，以及干净、略带酒感的葡萄调，读起来像冰过的麝香葡萄。适合慢冲与安静细品。",
+    "origin": "巴拿马蒂耶拉斯阿尔塔斯帕索安乔",
+    "variety": "瑰夏",
+    "producer": "埃德温·圣玛丽亚",
+    "elevation": "海拔 1,900 米",
+    "process": "16°C 下 2 天冷发酵日晒，继以 16°C 下 3 天水洗发酵"
+  },
+  "wilder-lazo-7": {
+    "name": "WILDER LAZO — 7",
+    "subtitle": "瑰夏 · 哥伦比亚",
+    "shortNotes": "伯爵茶 · 蓝莓 · 层次丰富",
+    "longNotes": "日晒瑰夏，茶感骨架明显：佛手柑与柔和柑橘托起果酱感蓝莓，余韵绵长多变。适合喜欢细腻、又不想被尖锐酸度抢戏的朋友。",
+    "origin": "哥伦比亚",
+    "variety": "瑰夏",
+    "process": "日晒"
+  },
+  "el-chaferote-7": {
+    "name": "EL CHAFEROTE — 7",
+    "subtitle": "粉波旁 · 哥伦比亚",
+    "shortNotes": "西柚 · 梨 · 金银花",
+    "longNotes": "来自惠兰的水洗粉波旁：明亮的粉红柑橘、圆润的果园甜感，以及柔和的花香上扬，整杯保持干净。好入口，但仍有足够话题可聊。",
+    "origin": "哥伦比亚惠兰",
+    "variety": "粉波旁",
+    "process": "水洗"
+  }
+}
