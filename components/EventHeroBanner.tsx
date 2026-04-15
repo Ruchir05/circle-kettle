@@ -1,13 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { CoffeePlantGraphic } from "@/components/CoffeePlantGraphic";
 import { getContactPhoneDisplay, POPUP_VENUE_ADDRESS_LINES } from "@/lib/config";
 import { useI18n } from "@/lib/i18n";
 import { getPopupScheduleLinesForLocale } from "@/lib/popupDisplay";
-
-const heroLinkClass =
-  "hero-inline-link text-sm font-medium underline underline-offset-[6px] transition-[text-decoration-color,color]";
 
 /** ~10% wider than max-w-xl (36rem). */
 const copyMax = "max-w-[40rem]";
@@ -48,12 +44,6 @@ export function EventHeroBanner() {
                 <p className="mt-8 text-base leading-relaxed text-[color:var(--hero-text-muted)] sm:text-lg">
                   {t("hero.lead")}
                 </p>
-
-                <div className="mt-10 text-left">
-                  <Link href="/book" className={`${heroLinkClass} inline-block`}>
-                    {t("hero.bookCta")}
-                  </Link>
-                </div>
               </div>
             </div>
 
@@ -118,14 +108,6 @@ export function EventHeroBanner() {
                     {line}
                   </span>
                 ))}
-              </p>
-              <p className="mt-5">
-                <Link
-                  href="/book"
-                  className="text-sm font-medium text-[color:var(--foreground)] underline decoration-[color:var(--border)] underline-offset-[5px] transition-colors hover:decoration-[color:var(--foreground)]"
-                >
-                  {t("hero.bookCta")}
-                </Link>
               </p>
             </div>
           </div>

@@ -17,7 +17,18 @@ export type AdminBookingRow = {
   notes: string | null;
   status: string;
   created_at: string;
+  guest_name_2?: string | null;
+  guest_name_3?: string | null;
+  guest_name_4?: string | null;
 };
+
+function formatPartyNames(row: AdminBookingRow): string {
+  const parts = [row.name];
+  if (row.guest_name_2?.trim()) parts.push(row.guest_name_2.trim());
+  if (row.guest_name_3?.trim()) parts.push(row.guest_name_3.trim());
+  if (row.guest_name_4?.trim()) parts.push(row.guest_name_4.trim());
+  return parts.join(" · ");
+}
 
 function formatSlot(iso: string): string {
   const dt = DateTime.fromISO(iso, { zone: "utc" }).setZone(POPUP_TIMEZONE);
@@ -46,7 +57,7 @@ export function AdminBookingsTable({ rows }: { rows: AdminBookingRow[] }) {
         <thead>
           <tr className="border-b border-[color:var(--border)] text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--foreground-muted)]">
             <th className="px-4 py-3 font-semibold">Slot</th>
-            <th className="px-4 py-3 font-semibold">Name</th>
+            <th className="px-4 py-3 font-semibold">Party names</th>
             <th className="px-4 py-3 font-semibold">Email</th>
             <th className="px-4 py-3 font-semibold">Phone</th>
             <th className="px-4 py-3 font-semibold">Party</th>
@@ -64,7 +75,7 @@ export function AdminBookingsTable({ rows }: { rows: AdminBookingRow[] }) {
               className="border-b border-[color:var(--border)] last:border-b-0 align-top"
             >
               <td className="px-4 py-3 whitespace-nowrap">{formatSlot(row.slot_start)}</td>
-              <td className="px-4 py-3">{row.name}</td>
+              <td className="max-w-[14rem] px-4 py-3 text-sm leading-snug">{formatPartyNames(row)}</td>
               <td className="px-4 py-3">
                 <a
                   href={`mailto:${encodeURIComponent(row.email)}`}
@@ -121,7 +132,7 @@ export function AdminBookingsCards({ rows }: { rows: AdminBookingRow[] }) {
           key={row.id}
           className="border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-4 text-sm"
         >
-          <p className="font-medium">{row.name}</p>
+          <p className="font-medium leading-snug">{formatPartyNames(row)}</p>
           <p className="mt-1 text-[color:var(--foreground-muted)]">{formatSlot(row.slot_start)}</p>
           <p className="mt-2">
             <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--foreground-muted)]">

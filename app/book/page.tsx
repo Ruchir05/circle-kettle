@@ -10,11 +10,13 @@ export const metadata: Metadata = {
 
 export default function BookPage() {
   return (
-    <main className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
-      <BookPageHeader />
+    <main className="book-page w-full min-h-full">
+      <div className="mx-auto max-w-6xl px-6 py-16 sm:py-20">
+        <BookPageHeader />
 
-      <div className="mt-14">
-        <BookForm />
+        <div className="mt-14">
+          <BookForm />
+        </div>
       </div>
     </main>
   );

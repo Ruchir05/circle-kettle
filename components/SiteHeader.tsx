@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { useI18n } from "@/lib/i18n";
 
 export function SiteHeader() {
   const { t } = useI18n();
+  const pathname = usePathname();
+  const onBookPage = pathname === "/book";
 
   return (
     <header
@@ -23,10 +26,10 @@ export function SiteHeader() {
         <div className="flex items-center gap-3 sm:gap-5">
           <nav aria-label="Main" className="flex items-center gap-4 text-sm font-medium sm:gap-6">
             <Link
-              href="/book"
+              href={onBookPage ? "/" : "/book"}
               className="text-[color:var(--foreground-muted)] underline-offset-4 transition-colors hover:text-[color:var(--foreground)] hover:underline"
             >
-              {t("nav.bookTasting")}
+              {onBookPage ? t("nav.home") : t("nav.bookTasting")}
             </Link>
           </nav>
           <LanguageToggle />

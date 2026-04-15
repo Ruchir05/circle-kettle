@@ -73,6 +73,41 @@ body {
   scrollbar-gutter: stable;
 }
 
+/*
+ * /book only: follows the same theme toggle as the hero.
+ * Default (no `data-theme="light"`): charcoal + hero ink — same as landing hero column.
+ * Light hero on: cream page + site ink — same as the rest of the site.
+ */
+html:not([data-theme="light"]) .book-page {
+  --foreground: var(--hero-text);
+  --foreground-muted: var(--hero-text-muted);
+  min-height: 100%;
+  background-color: var(--hero-bg);
+  color: var(--foreground);
+}
+
+html[data-theme="light"] .book-page {
+  --foreground: #1f1f1f;
+  --foreground-muted: rgba(31, 31, 31, 0.62);
+  min-height: 100%;
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+/* Light cream panels on /book: ink tokens so labels are not light-on-light. */
+.book-page .book-on-light-surface {
+  --foreground: #1f1f1f;
+  --foreground-muted: rgba(31, 31, 31, 0.62);
+  color: var(--foreground);
+}
+
+/* Form controls use --surface (cream); keep text dark on /book. */
+.book-page :where(input.form-field, textarea.form-field, select.form-field) {
+  --foreground: #1f1f1f;
+  --foreground-muted: rgba(31, 31, 31, 0.62);
+  color: var(--foreground);
+}
+
 @keyframes coffee-plant-drift {
   0%,
   100% {

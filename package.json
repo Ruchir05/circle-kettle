@@ -7,7 +7,13 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "vitest run"
+    "test": "vitest run",
+    "supabase": "supabase",
+    "supabase:login": "supabase login",
+    "supabase:link": "supabase link --project-ref ucoomilccfdybcywqnoq --yes",
+    "supabase:db:push": "bash scripts/supabase-db-push-all.sh",
+    "supabase:db:push:all": "SUPABASE_EXTRA_PROJECT_REFS=${SUPABASE_EXTRA_PROJECT_REFS:-byueahbbqtyvzmfdzzen} bash scripts/supabase-db-push-all.sh",
+    "supabase:db:push:dry": "npm run supabase:link && supabase db push --dry-run"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.2",
@@ -26,6 +32,7 @@
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.2.3",
+    "supabase": "^2.91.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "^4.1.4"

@@ -36,25 +36,44 @@ export default async function AdminBookingsPage() {
     );
   }
 
-  const { data, error } = await client
+  const bookingColumnsFull =
+    "id, slot_start, party_size, coffee_choice, name, email, phone, notes, status, created_at, guest_name_2, guest_name_3, guest_name_4";
+  const bookingColumnsBase =
+    "id, slot_start, party_size, coffee_choice, name, email, phone, notes, status, created_at";
+
+  const primary = await client
     .from("bookings")
-    .select(
-      "id, slot_start, party_size, coffee_choice, name, email, phone, notes, status, created_at",
-    )
+    .select(bookingColumnsFull)
     .order("slot_start", { ascending: true })
     .order("created_at", { ascending: true });
 
-  if (error) {
+  let rowsData: AdminBookingRow[] | null = (primary.data as AdminBookingRow[]) ?? null;
+  let loadError = primary.error;
+
+  const msg = loadError?.message ?? "";
+  const missingGuestColumn = /guest_name/i.test(msg) && /does not exist/i.test(msg);
+
+  if (loadError && missingGuestColumn) {
+    const fallback = await client
+      .from("bookings")
+      .select(bookingColumnsBase)
+      .order("slot_start", { ascending: true })
+      .order("created_at", { ascending: true });
+    rowsData = (fallback.data as AdminBookingRow[]) ?? null;
+    loadError = fallback.error;
+  }
+
+  if (loadError) {
     return (
       <AdminDashboardChrome>
-        <p className="text-sm text-red-800" role="alert">
-          Could not load bookings: {error.message}
+        <p className="text-sm text-amber-800" role="alert">
+          Could not load bookings: {loadError.message}
         </p>
       </AdminDashboardChrome>
     );
   }
 
-  const rows = (data ?? []) as AdminBookingRow[];
+  const rows = rowsData ?? [];
 
   return (
     <AdminDashboardChrome>

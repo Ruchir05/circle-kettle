@@ -32,7 +32,17 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Supabase setup
 
 1. Create a project in the [Supabase dashboard](https://supabase.com/dashboard).  
-2. In **SQL Editor**, run the migration in [`supabase/migrations/20260414120000_bookings.sql`](supabase/migrations/20260414120000_bookings.sql) (or use the [Supabase CLI](https://supabase.com/docs/guides/cli) to `db push`).  
+2. Apply migrations **either** in the **SQL Editor** (paste and run each file under `supabase/migrations/`), **or** from this repo with the **Supabase CLI** (installed as a dev dependency):
+
+   ```bash
+   npm run supabase:login          # once per machine: browser or paste access token from Account → Access Tokens
+   npm run supabase:link           # links this folder to your project (ref matches your NEXT_PUBLIC_SUPABASE_URL host)
+   npm run supabase:db:push:dry    # optional: see pending migrations
+   npm run supabase:db:push        # applies pending migrations; use -p if prompted, e.g. npx supabase db push -p YOUR_DB_PASSWORD
+   ```
+
+   The **database password** is under **Project Settings → Database** (not the API keys in `.env.local`). If `db push` asks for it, pass `-p` or set `SUPABASE_DB_PASSWORD` for that shell session.
+
 3. Copy **Project URL**, **anon public** key, and **service_role** key into `.env.local` as in [`.env.example`](.env.example).  
 
 ### Security model

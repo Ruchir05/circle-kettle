@@ -3,7 +3,7 @@
 import { submitBooking, type BookingState } from "@/app/actions/booking";
 import { translateBookingUiMessage } from "@/lib/bookingUiMessages";
 import { POPUP_EVENT_DATE, POPUP_TIMEZONE } from "@/lib/config";
-import { getCoffeeOptionsForForm } from "@/lib/coffees";
+import { COFFEE_CHOICE_JSON_VERSION, getCoffeeRowsForBookingForm } from "@/lib/coffees";
 import { useI18n } from "@/lib/i18n";
 import { DateTime } from "luxon";
 import {
@@ -20,6 +20,9 @@ const initial: BookingState = { ok: false, message: "" };
 const fieldClass =
   "form-field mt-3 block w-full rounded-xl border border-[color:var(--border)] px-4 py-3 text-sm text-[color:var(--foreground)] shadow-none outline-none focus:border-[color:var(--foreground)]/30";
 
+const qtySelectClass =
+  "form-field mt-0 block w-auto min-w-[4.5rem] rounded-xl border border-[color:var(--border)] px-3 py-2 text-sm text-[color:var(--foreground)] shadow-none outline-none focus:border-[color:var(--foreground)]/30";
+
 type SlotRow = {
   slot_start: string;
   booked: number;
@@ -33,7 +36,7 @@ function SubmitButton({ disabled, pending }: { disabled: boolean; pending: boole
     <button
       type="submit"
       disabled={pending || disabled}
-      className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[color:var(--accent)] px-8 text-sm font-semibold text-[color:var(--accent-foreground)] transition-opacity disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+      className="w-full text-left text-sm font-medium text-[color:var(--foreground-muted)] underline decoration-[color:var(--border)] underline-offset-[6px] transition-[color,text-decoration-color] hover:text-[color:var(--foreground)] hover:decoration-[color:var(--foreground)] disabled:cursor-not-allowed disabled:opacity-45 disabled:hover:text-[color:var(--foreground-muted)] disabled:hover:decoration-[color:var(--border)] sm:w-auto"
     >
       {pending ? t("bookForm.sending") : t("bookForm.confirm")}
     </button>
@@ -51,66 +54,224 @@ export function BookForm() {
   const [state, formAction, isSubmitPending] = useActionState(submitBooking, initial);
   const [slots, setSlots] = useState<SlotRow[] | null>(null);
   const [slotsError, setSlotsError] = useState<string | null>(null);
+  const [cupBySlug, setCupBySlug] = useState<Record<string, number> | null>(null);
+  const [cupsDemo, setCupsDemo] = useState(false);
+  const [coffeeCupsError, setCoffeeCupsError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
-  const loadSlots = useCallback(() => {
+  const loadLiveAvailability = useCallback(() => {
     startTransition(async () => {
       setSlotsError(null);
+      setCoffeeCupsError(null);
       try {
-        const res = await fetch(
-          `/api/slots?date=${encodeURIComponent(POPUP_EVENT_DATE)}`,
-          { cache: "no-store" },
-        );
-        const json = (await res.json()) as {
+        const [slotRes, cupRes] = await Promise.all([
+          fetch(`/api/slots?date=${encodeURIComponent(POPUP_EVENT_DATE)}`, {
+            cache: "no-store",
+          }),
+          fetch("/api/coffee-cups", { cache: "no-store" }),
+        ]);
+
+        const slotJson = (await slotRes.json()) as {
           slots?: SlotRow[];
           error?: string;
           message?: string;
           supabase_error?: string;
         };
-        if (!res.ok) {
+        const cupJson = (await cupRes.json()) as {
+          cups?: { coffee_slug: string; remaining: number }[];
+          demo?: boolean;
+          supabase_error?: string;
+          message?: string;
+        };
+
+        if (!slotRes.ok) {
           setSlotsError(
-            json.message ??
-              json.error ??
-              t("bookForm.slotLoadErrorStatus", { status: String(res.status) }),
+            slotJson.message ??
+              slotJson.error ??
+              t("bookForm.slotLoadErrorStatus", { status: String(slotRes.status) }),
           );
           setSlots([]);
-          return;
+        } else {
+          if (slotJson.supabase_error) {
+            setSlotsError(t("bookForm.slotLiveCounts", { reason: slotJson.supabase_error }));
+          }
+          setSlots(slotJson.slots ?? []);
         }
-        if (json.supabase_error) {
-          setSlotsError(t("bookForm.slotLiveCounts", { reason: json.supabase_error }));
+
+        if (!cupRes.ok) {
+          setCoffeeCupsError(
+            cupJson.message ??
+              t("bookForm.slotLoadErrorStatus", { status: String(cupRes.status) }),
+          );
+          setCupBySlug(null);
+          setCupsDemo(false);
+        } else {
+          setCupsDemo(Boolean(cupJson.demo));
+          if (cupJson.supabase_error) {
+            setCoffeeCupsError(
+              t("bookForm.coffeeCupLiveCounts", { reason: cupJson.supabase_error }),
+            );
+          }
+          if (cupJson.demo || !Array.isArray(cupJson.cups)) {
+            setCupBySlug(null);
+          } else {
+            const next: Record<string, number> = {};
+            for (const row of cupJson.cups) {
+              next[row.coffee_slug] = Math.max(0, Number(row.remaining));
+            }
+            setCupBySlug(next);
+          }
         }
-        setSlots(json.slots ?? []);
       } catch {
         setSlotsError(t("bookForm.slotLoadError"));
         setSlots([]);
+        setCoffeeCupsError(t("bookForm.slotLoadError"));
+        setCupBySlug(null);
       }
     });
   }, [t]);
 
   useEffect(() => {
-    loadSlots();
-  }, [loadSlots]);
+    loadLiveAvailability();
+  }, [loadLiveAvailability]);
 
-  /** Keep slot counts in sync when bookings change (e.g. admin delete); avoids needing a full reload. */
+  /** Keep slot + cup counts in sync when bookings change (e.g. admin delete). */
   useEffect(() => {
     const intervalMs = 25_000;
-    const interval = window.setInterval(() => loadSlots(), intervalMs);
+    const interval = window.setInterval(() => loadLiveAvailability(), intervalMs);
     const onVisible = () => {
-      if (document.visibilityState === "visible") loadSlots();
+      if (document.visibilityState === "visible") loadLiveAvailability();
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [loadSlots]);
+  }, [loadLiveAvailability]);
+
+  const coffeeRows = useMemo(
+    () => getCoffeeRowsForBookingForm(locale, t("bookForm.priceSuffix")),
+    [locale, t],
+  );
 
   useEffect(() => {
-    const el = document.getElementById("slot_start_field") as HTMLInputElement | null;
-    if (el) el.value = "";
-  }, []);
+    if (!cupBySlug || cupsDemo) return;
+    setCoffeeChecked((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const slug of Object.keys(next)) {
+        if (
+          next[slug] &&
+          Object.hasOwn(cupBySlug, slug) &&
+          cupBySlug[slug] <= 0
+        ) {
+          next[slug] = false;
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+    setCoffeeQty((q) => {
+      const next = { ...q };
+      let changed = false;
+      for (const slug of Object.keys(next)) {
+        if (Object.hasOwn(cupBySlug, slug) && cupBySlug[slug] <= 0) {
+          delete next[slug];
+          changed = true;
+        }
+      }
+      return changed ? next : q;
+    });
+  }, [cupBySlug, cupsDemo]);
 
-  const coffeeOptions = useMemo(() => getCoffeeOptionsForForm(locale), [locale]);
+  const [partySize, setPartySize] = useState(2);
+  const [coffeeChecked, setCoffeeChecked] = useState<Record<string, boolean>>({});
+  const [coffeeQty, setCoffeeQty] = useState<Record<string, number>>({});
+  /** Controlled so the chosen slot survives re-renders after a server action and is always posted as `slot_start`. */
+  const [selectedSlot, setSelectedSlot] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [notes, setNotes] = useState("");
+  const [guest2, setGuest2] = useState("");
+  const [guest3, setGuest3] = useState("");
+  const [guest4, setGuest4] = useState("");
+
+  useEffect(() => {
+    setCoffeeChecked({});
+    setCoffeeQty({});
+    setSelectedSlot("");
+    setName("");
+    setEmail("");
+    setPhone("");
+    setNotes("");
+    setGuest2("");
+    setGuest3("");
+    setGuest4("");
+  }, [locale]);
+
+  useEffect(() => {
+    if (!slots?.length || !selectedSlot) return;
+    const stillThere = slots.some((s) => s.slot_start === selectedSlot);
+    if (!stillThere) setSelectedSlot("");
+  }, [slots, selectedSlot]);
+
+  useEffect(() => {
+    if (!state.ok || !state.bookingId) return;
+    setSelectedSlot("");
+    setName("");
+    setEmail("");
+    setPhone("");
+    setNotes("");
+    setGuest2("");
+    setGuest3("");
+    setGuest4("");
+    setPartySize(2);
+    setCoffeeChecked({});
+    setCoffeeQty({});
+  }, [state.ok, state.bookingId]);
+
+  const coffeeChoiceJson = useMemo(() => {
+    const items = coffeeRows
+      .filter((r) => coffeeChecked[r.slug])
+      .map((r) => ({ slug: r.slug, qty: coffeeQty[r.slug] ?? 1 }));
+    return JSON.stringify({
+      v: COFFEE_CHOICE_JSON_VERSION,
+      serve: "hot",
+      unsure: false,
+      items,
+    });
+  }, [coffeeChecked, coffeeQty, coffeeRows]);
+
+  const totalCoffeeQty = useMemo(() => {
+    return coffeeRows
+      .filter((r) => coffeeChecked[r.slug])
+      .reduce((s, r) => s + (coffeeQty[r.slug] ?? 1), 0);
+  }, [coffeeChecked, coffeeQty, coffeeRows]);
+
+  const coffeeChoiceValid = coffeeRows.some((r) => coffeeChecked[r.slug]);
+  const qtyWithinParty = totalCoffeeQty <= partySize;
+
+  useEffect(() => {
+    setCoffeeQty((q) => {
+      const next = { ...q };
+      let changed = false;
+      const maxParty = Math.min(4, partySize);
+      for (const row of coffeeRows) {
+        if (!coffeeChecked[row.slug]) continue;
+        const inv =
+          cupBySlug && !cupsDemo && Object.hasOwn(cupBySlug, row.slug)
+            ? cupBySlug[row.slug]
+            : undefined;
+        const cap = inv !== undefined ? Math.min(maxParty, inv) : maxParty;
+        if ((q[row.slug] ?? 1) > cap) {
+          next[row.slug] = Math.max(1, cap);
+          changed = true;
+        }
+      }
+      return changed ? next : q;
+    });
+  }, [coffeeRows, coffeeChecked, partySize, cupBySlug, cupsDemo]);
 
   return (
     <div className="grid gap-12 lg:grid-cols-5">
@@ -125,17 +286,17 @@ export function BookForm() {
           <p>
             <span className="font-medium text-[color:var(--foreground-muted)]">
               {t("bookForm.whenLabel")}
-            </span>
-            {t("bookForm.whenValue")}
+            </span>{" "}
+            <span>{t("bookForm.whenValue")}</span>
           </p>
           <p>
             <span className="font-medium text-[color:var(--foreground-muted)]">
               {t("bookForm.whereLabel")}
-            </span>
-            {t("bookForm.whereValue")}
+            </span>{" "}
+            <span>{t("bookForm.whereValue")}</span>
           </p>
         </div>
-        {slotsError && <p className="mt-4 text-sm text-red-700">{slotsError}</p>}
+        {slotsError && <p className="mt-4 text-sm text-amber-800">{slotsError}</p>}
         {isPending && !slots && (
           <p className="mt-4 text-sm text-[color:var(--foreground-muted)]">
             {t("bookForm.loadingSlots")}
@@ -144,7 +305,7 @@ export function BookForm() {
       </div>
 
       <form action={formAction} className="space-y-10 lg:col-span-3">
-        <input type="hidden" name="slot_start" id="slot_start_field" defaultValue="" />
+        <input type="hidden" name="slot_start" value={selectedSlot} />
         <input
           type="text"
           name="website"
@@ -167,7 +328,7 @@ export function BookForm() {
               return (
                 <li key={row.slot_start}>
                   <label
-                    className={`flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-4 text-sm shadow-none transition-colors ${
+                    className={`book-on-light-surface flex cursor-pointer items-center justify-between gap-4 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-4 text-sm shadow-none transition-colors ${
                       disabled ? "cursor-not-allowed opacity-50" : "hover:border-[color:var(--foreground)]/20"
                     }`}
                   >
@@ -176,14 +337,9 @@ export function BookForm() {
                         type="radio"
                         name="slot_pick"
                         value={row.slot_start}
+                        checked={selectedSlot === row.slot_start}
                         disabled={disabled}
-                        required
-                        onChange={() => {
-                          const el = document.getElementById(
-                            "slot_start_field",
-                          ) as HTMLInputElement | null;
-                          if (el) el.value = row.slot_start;
-                        }}
+                        onChange={() => setSelectedSlot(row.slot_start)}
                       />
                       <span className="font-medium text-[color:var(--foreground)]">
                         {formatSlotLabel(row.slot_start)}
@@ -207,7 +363,13 @@ export function BookForm() {
         <div className="grid gap-6 sm:grid-cols-2">
           <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
             {t("bookForm.partySize")}
-            <select name="party_size" required defaultValue="2" className={fieldClass}>
+            <select
+              name="party_size"
+              required
+              value={partySize}
+              onChange={(e) => setPartySize(Number(e.target.value))}
+              className={fieldClass}
+            >
               {[1, 2, 3, 4].map((n) => (
                 <option key={n} value={n}>
                   {n} {n === 1 ? t("bookForm.guest") : t("bookForm.guests")}
@@ -216,32 +378,160 @@ export function BookForm() {
             </select>
           </label>
 
-          <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)] sm:col-span-2">
-            {t("bookForm.coffeeChoice")}
-            <select
-              key={locale}
-              name="coffee_choice"
-              required
-              defaultValue=""
-              className={fieldClass}
-            >
-              <option value="" disabled>
-                {t("bookForm.selectPlaceholder")}
-              </option>
-              {coffeeOptions.map((o) => (
-                <option key={o.slug} value={o.slug}>
-                  {o.label}
-                </option>
-              ))}
-            </select>
-          </label>
+          <fieldset className="sm:col-span-2">
+            <legend className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
+              {t("bookForm.coffeeChoice")}
+            </legend>
+            <p className="mt-2 text-sm leading-relaxed text-[color:var(--foreground-muted)]">
+              {t("bookForm.coffeeChoiceHelp")}
+            </p>
+            {coffeeCupsError ? (
+              <p className="mt-2 text-sm text-amber-800" role="status">
+                {coffeeCupsError}
+              </p>
+            ) : null}
+            <input type="hidden" name="coffee_choice" value={coffeeChoiceJson} readOnly />
+
+            <ul className="mt-4 space-y-3" key={locale}>
+              {coffeeRows.map((row) => {
+                const checked = Boolean(coffeeChecked[row.slug]);
+                const inv =
+                  cupBySlug && !cupsDemo && Object.hasOwn(cupBySlug, row.slug)
+                    ? cupBySlug[row.slug]
+                    : undefined;
+                const soldOut = inv !== undefined && inv <= 0;
+                const maxQty = Math.min(4, partySize, inv ?? 999);
+                return (
+                  <li
+                    key={row.slug}
+                    className={`book-on-light-surface flex flex-wrap items-center gap-3 rounded-xl border border-[color:var(--border)] bg-[color:var(--surface)] px-4 py-3 text-sm sm:flex-nowrap sm:justify-between ${
+                      soldOut ? "opacity-50" : ""
+                    }`}
+                  >
+                    <label
+                      className={`flex min-w-0 flex-1 items-center gap-3 ${soldOut ? "cursor-not-allowed" : "cursor-pointer"}`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        disabled={soldOut}
+                        onChange={(e) => {
+                          if (soldOut) return;
+                          const on = e.target.checked;
+                          setCoffeeChecked((c) => ({ ...c, [row.slug]: on }));
+                          if (on) {
+                            setCoffeeQty((q) => ({ ...q, [row.slug]: q[row.slug] ?? 1 }));
+                          } else {
+                            setCoffeeQty((q) => {
+                              const next = { ...q };
+                              delete next[row.slug];
+                              return next;
+                            });
+                          }
+                        }}
+                      />
+                      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span className="font-medium text-[color:var(--foreground)]">
+                          {row.label}
+                        </span>
+                        {inv !== undefined ? (
+                          <span className="text-xs font-medium text-[color:var(--foreground-muted)]">
+                            {soldOut
+                              ? t("bookForm.coffeeSoldOutBadge")
+                              : t("bookForm.coffeeCupsLeft", { count: inv })}
+                          </span>
+                        ) : null}
+                      </span>
+                    </label>
+                    <label className="flex shrink-0 items-center gap-2 text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--foreground-muted)]">
+                      <span className="whitespace-nowrap">{t("bookForm.qty")}</span>
+                      <select
+                        className={qtySelectClass}
+                        disabled={!checked || soldOut || maxQty < 1}
+                        value={Math.min(coffeeQty[row.slug] ?? 1, Math.max(1, maxQty))}
+                        onChange={(e) =>
+                          setCoffeeQty((q) => ({
+                            ...q,
+                            [row.slug]: Number(e.target.value),
+                          }))
+                        }
+                      >
+                        {Array.from({ length: Math.max(1, maxQty) }, (_, i) => i + 1).map((n) => (
+                          <option key={n} value={n}>
+                            {n}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+            {!qtyWithinParty && (
+              <p className="mt-3 text-sm text-amber-800" role="alert">
+                {translateBookingUiMessage(
+                  "Total tasting quantities cannot exceed party size.",
+                  locale,
+                )}
+              </p>
+            )}
+          </fieldset>
         </div>
 
         <div className="grid gap-6">
           <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
             {t("bookForm.name")}
-            <input name="name" required autoComplete="name" className={fieldClass} />
+            <span className="mt-1 block text-[0.65rem] font-normal normal-case tracking-normal text-[color:var(--foreground-muted)]">
+              {t("bookForm.leadGuestHint")}
+            </span>
+            <input
+              name="name"
+              required
+              autoComplete="name"
+              className={fieldClass}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           </label>
+          {partySize >= 2 ? (
+            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
+              {t("bookForm.guest2")}
+              <input
+                name="guest_name_2"
+                required
+                autoComplete="name"
+                className={fieldClass}
+                value={guest2}
+                onChange={(e) => setGuest2(e.target.value)}
+              />
+            </label>
+          ) : null}
+          {partySize >= 3 ? (
+            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
+              {t("bookForm.guest3")}
+              <input
+                name="guest_name_3"
+                required
+                autoComplete="name"
+                className={fieldClass}
+                value={guest3}
+                onChange={(e) => setGuest3(e.target.value)}
+              />
+            </label>
+          ) : null}
+          {partySize >= 4 ? (
+            <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
+              {t("bookForm.guest4")}
+              <input
+                name="guest_name_4"
+                required
+                autoComplete="name"
+                className={fieldClass}
+                value={guest4}
+                onChange={(e) => setGuest4(e.target.value)}
+              />
+            </label>
+          ) : null}
           <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
             {t("bookForm.email")}
             <input
@@ -250,6 +540,8 @@ export function BookForm() {
               required
               autoComplete="email"
               className={fieldClass}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
             />
           </label>
           <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
@@ -257,14 +549,26 @@ export function BookForm() {
             <span className="font-normal normal-case text-[color:var(--foreground-muted)]">
               {t("bookForm.optional")}
             </span>
-            <input name="phone" autoComplete="tel" className={fieldClass} />
+            <input
+              name="phone"
+              autoComplete="tel"
+              className={fieldClass}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+            />
           </label>
           <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
             {t("bookForm.notes")}{" "}
             <span className="font-normal normal-case text-[color:var(--foreground-muted)]">
               {t("bookForm.optional")}
             </span>
-            <textarea name="notes" rows={3} className={fieldClass} />
+            <textarea
+              name="notes"
+              rows={3}
+              className={fieldClass}
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
           </label>
         </div>
 
@@ -275,7 +579,7 @@ export function BookForm() {
         {state.message && (
           <p
             role={state.ok ? "status" : "alert"}
-            className={`text-sm ${state.ok ? "text-emerald-800" : "text-red-800"}`}
+            className={`text-sm ${state.ok ? "text-emerald-800" : "text-amber-800"}`}
           >
             {translateBookingUiMessage(state.message, locale)}
           </p>
@@ -286,7 +590,10 @@ export function BookForm() {
           disabled={
             isPending ||
             !slots?.length ||
-            !slots.some((row) => row.remaining > 0)
+            !slots.some((row) => row.remaining > 0) ||
+            !selectedSlot.trim() ||
+            !coffeeChoiceValid ||
+            !qtyWithinParty
           }
         />
       </form>

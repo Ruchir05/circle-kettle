@@ -15,6 +15,9 @@ export function HomeBeanShowcase() {
     [selectedSlug, locale],
   );
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [cupMap, setCupMap] = useState<Record<string, number> | null>(null);
+  const [cupsDemo, setCupsDemo] = useState(false);
+  const [cupsError, setCupsError] = useState<string | null>(null);
   const titleId = useId();
   const descId = useId();
   const closeBtnRef = useRef<HTMLButtonElement>(null);
@@ -25,6 +28,55 @@ export function HomeBeanShowcase() {
   useLayoutEffect(() => {
     drawerOpenRef.current = drawerOpen;
   }, [drawerOpen]);
+
+  const loadCupInventory = useCallback(() => {
+    void (async () => {
+      try {
+        const res = await fetch("/api/coffee-cups", { cache: "no-store" });
+        const json = (await res.json()) as {
+          cups?: { coffee_slug: string; remaining: number }[];
+          demo?: boolean;
+          supabase_error?: string;
+          message?: string;
+        };
+        if (!res.ok) {
+          setCupsError(json.message ?? "error");
+          setCupMap(null);
+          return;
+        }
+        setCupsDemo(Boolean(json.demo));
+        setCupsError(json.supabase_error ?? null);
+        if (json.demo || !Array.isArray(json.cups)) {
+          setCupMap(null);
+          return;
+        }
+        const next: Record<string, number> = {};
+        for (const row of json.cups) {
+          next[row.coffee_slug] = Math.max(0, Number(row.remaining));
+        }
+        setCupMap(next);
+      } catch {
+        setCupsError("fetch_failed");
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    loadCupInventory();
+  }, [loadCupInventory]);
+
+  useEffect(() => {
+    const intervalMs = 25_000;
+    const interval = window.setInterval(() => loadCupInventory(), intervalMs);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") loadCupInventory();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [loadCupInventory]);
 
   const openPanel = useCallback((coffee: Coffee) => {
     if (closeTimerRef.current) {
@@ -144,6 +196,13 @@ export function HomeBeanShowcase() {
             <p id={descId} className="mt-2 shrink-0 text-sm text-[color:var(--foreground-muted)]">
               {panelCoffee.shortNotes}
             </p>
+            {cupMap && !cupsDemo && Object.hasOwn(cupMap, panelCoffee.slug) ? (
+              <p className="mt-3 shrink-0 text-sm font-medium text-[color:var(--foreground)]">
+                {cupMap[panelCoffee.slug] <= 0
+                  ? t("beans.soldOut")
+                  : t("beans.cupsLeft", { count: cupMap[panelCoffee.slug] })}
+              </p>
+            ) : null}
 
             <div className="mt-6 shrink-0 overflow-hidden border border-[color:var(--border)]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -213,44 +272,66 @@ export function HomeBeanShowcase() {
 
   return (
     <>
+      {cupsError && !cupsDemo ? (
+        <p className="mb-3 text-xs text-[color:var(--foreground-muted)]" role="status">
+          {t("beans.cupCountsUnavailable")}
+        </p>
+      ) : null}
       <div
         className="grid w-full min-w-0 grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4 md:gap-6"
         role="list"
         aria-label={t("beans.listLabel")}
       >
-        {coffees.map((coffee) => (
-          <div key={coffee.slug} role="listitem" className="min-w-0">
-            <button
-              type="button"
-              onClick={() => openPanel(coffee)}
-              className="group relative w-full min-w-0 overflow-hidden border border-[color:var(--border)] bg-[color:var(--surface)] text-left"
-            >
-              <span className="relative block aspect-square w-full overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element -- local catalog art */}
-                <img
-                  src={coffee.image}
-                  alt=""
-                  width={400}
-                  height={400}
-                  className="h-full w-full object-cover"
-                />
-                <span className="bean-slide-overlay pointer-events-none absolute inset-x-0 bottom-0 border-t border-white/15 bg-[#1f1f1f]/92 px-4 py-4 text-[color:var(--accent-foreground)]">
-                  <span className="block text-lg font-semibold tracking-tight text-white">
-                    {coffee.name}
-                  </span>
-                  {coffee.subtitle ? (
-                    <span className="mt-1 block text-[0.65rem] font-medium uppercase tracking-[0.14em] text-white/65">
-                      {coffee.subtitle}
+        {coffees.map((coffee) => {
+          const remaining =
+            cupMap && !cupsDemo && Object.hasOwn(cupMap, coffee.slug)
+              ? cupMap[coffee.slug]
+              : undefined;
+          const remainingKnown = remaining !== undefined;
+          const soldOut = remainingKnown && remaining <= 0;
+          return (
+            <div key={coffee.slug} role="listitem" className="min-w-0">
+              <button
+                type="button"
+                onClick={() => openPanel(coffee)}
+                className="group relative w-full min-w-0 overflow-hidden border border-[color:var(--border)] bg-[color:var(--surface)] text-left"
+              >
+                <span className="relative block aspect-square w-full overflow-hidden">
+                  {/* eslint-disable-next-line @next/next/no-img-element -- local catalog art */}
+                  <img
+                    src={coffee.image}
+                    alt=""
+                    width={400}
+                    height={400}
+                    className={`h-full w-full object-cover ${soldOut ? "opacity-50 grayscale-[0.35]" : ""}`}
+                  />
+                  <span className="bean-slide-overlay pointer-events-none absolute inset-x-0 bottom-0 border-t border-white/15 bg-[#1f1f1f]/92 px-4 py-4 text-[color:var(--accent-foreground)]">
+                    <span className="block text-lg font-semibold tracking-tight text-white">
+                      {coffee.name}
                     </span>
-                  ) : null}
-                  <span className="mt-2 block text-sm leading-snug text-white/85">
-                    {coffee.shortNotes}
+                    {coffee.subtitle ? (
+                      <span className="mt-1 block text-[0.65rem] font-medium uppercase tracking-[0.14em] text-white/65">
+                        {coffee.subtitle}
+                      </span>
+                    ) : null}
+                    <span className="mt-2 block text-sm leading-snug text-white/85">
+                      {coffee.shortNotes}
+                    </span>
+                    {remainingKnown ? (
+                      <span
+                        className={`mt-2 block text-[0.7rem] font-semibold uppercase tracking-[0.12em] ${
+                          soldOut ? "text-amber-200/95" : "text-white/75"
+                        }`}
+                      >
+                        {soldOut ? t("beans.soldOut") : t("beans.cupsLeft", { count: remaining })}
+                      </span>
+                    ) : null}
                   </span>
                 </span>
-              </span>
-            </button>
-          </div>
-        ))}
+              </button>
+            </div>
+          );
+        })}
       </div>
 
       {portalTarget && overlay ? createPortal(overlay, portalTarget) : null}

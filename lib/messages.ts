@@ -2,7 +2,7 @@ export type Locale = "en" | "zh";
 
 export const messages = {
   en: {
-    nav: { bookTasting: "Book a tasting" },
+    nav: { bookTasting: "Book a tasting", home: "Home" },
     language: {
       ariaToZh: "Switch site language to Chinese",
       ariaToEn: "Switch site language to English",
@@ -16,7 +16,7 @@ export const messages = {
       kicker: "One day only · UIUC",
       title: "Coffee, unhurried. A thirty-minute table for up to four.",
       lead:
-        "We brew a focused menu of single-origin lots—bright, balanced, and bold—so you can taste with a little guidance and a lot of room to talk. Book a slot, pick a coffee or stay open-minded, and we will meet you there.",
+        "We brew a focused menu of single-origin lots—bright, balanced, and bold—so you can taste with a little guidance and a lot of room to talk. Book a slot, pick what you want in the cup, and we will meet you there.",
       bookCta: "Book a tasting",
       hours: "Hours",
       contact: "Contact",
@@ -36,12 +36,15 @@ export const messages = {
       producer: "Producer",
       elevation: "Elevation",
       process: "Process",
+      cupsLeft: "{count} tasting cups left",
+      soldOut: "Sold out for this event",
+      cupCountsUnavailable: "Cup counts unavailable right now.",
     },
     bookPage: {
       kicker: "Reservations",
       title: "Book a tasting",
       intro:
-        "Saturday, April 18, 2026 · 1:00–5:00 PM at {address}. Choose a half-hour window, up to four people, and a coffee—or pick Unsure and we will pour something that fits the table.",
+        "Saturday, April 18, 2026 · 1:00–5:00 PM at {address}. Choose a half-hour window, up to four people, and which coffee(s) you would like to taste.",
       introAddress: "1004 W Main Street, Urbana, IL 61801, Unit 204",
     },
     bookForm: {
@@ -61,7 +64,15 @@ export const messages = {
       guest: "guest",
       guests: "guests",
       coffeeChoice: "Coffee to taste",
+      coffeeChoiceHelp:
+        "Check one or more coffees and choose quantity (1–4 cups each, up to your party size).",
+      priceSuffix: "7 USD",
+      qty: "Qty",
       selectPlaceholder: "Select…",
+      leadGuestHint: "Guest 1 / contact",
+      guest2: "Guest 2 full name",
+      guest3: "Guest 3 full name",
+      guest4: "Guest 4 full name",
       name: "Name",
       email: "Email",
       phone: "Phone",
@@ -75,6 +86,10 @@ export const messages = {
       slotLoadErrorStatus: "Could not load availability ({status}).",
       slotLiveCounts:
         "Live counts unavailable ({reason}). Slots still show full capacity for planning.",
+      coffeeCupsLeft: "{count} cups left",
+      coffeeSoldOutBadge: "Sold out",
+      coffeeCupLiveCounts:
+        "Live cup counts unavailable ({reason}). You can still choose coffees; we will confirm at booking.",
     },
     theme: {
       useDark: "Use dark hero",
@@ -84,7 +99,7 @@ export const messages = {
     },
   },
   zh: {
-    nav: { bookTasting: "预约品鉴" },
+    nav: { bookTasting: "预约品鉴", home: "首页" },
     language: {
       ariaToZh: "切换为中文",
       ariaToEn: "切换为英文",
@@ -98,7 +113,7 @@ export const messages = {
       kicker: "仅一天 · UIUC",
       title: "咖啡，慢慢来。最多四人的三十分钟小桌。",
       lead:
-        "我们精选单一产区豆单——明亮、平衡、也有力量感——让你有一点引导，也有足够空间聊天。预约时段，选一款咖啡或保持开放，我们在桌前见。",
+        "我们精选单一产区豆单——明亮、平衡、也有力量感——让你有一点引导，也有足够空间聊天。预约时段，选好你想喝的，我们在桌前见。",
       bookCta: "预约品鉴",
       hours: "时间",
       contact: "联系",
@@ -118,12 +133,15 @@ export const messages = {
       producer: "生产者",
       elevation: "海拔",
       process: "处理法",
+      cupsLeft: "剩余 {count} 杯品鉴",
+      soldOut: "本场已售罄",
+      cupCountsUnavailable: "暂时无法显示剩余杯数。",
     },
     bookPage: {
       kicker: "预约",
       title: "预约品鉴",
       intro:
-        "2026年4月18日 · 下午1:00–5:00，地点 {address}。选择半小时时段，最多四人，并选一款咖啡——或选择「不确定」，我们会为这一桌搭配合适的出品。",
+        "2026年4月18日 · 下午1:00–5:00，地点 {address}。选择半小时时段，最多四人，并选择想品鉴的咖啡。",
       introAddress: "1004 W Main Street, Urbana, IL 61801, Unit 204",
     },
     bookForm: {
@@ -142,7 +160,15 @@ export const messages = {
       guest: "位",
       guests: "位",
       coffeeChoice: "想品鉴的咖啡",
+      coffeeChoiceHelp:
+        "可勾选一款或多款咖啡并分别选择数量（1–4 杯，且不超过人数）。",
+      priceSuffix: "7 美元",
+      qty: "数量",
       selectPlaceholder: "请选择…",
+      leadGuestHint: "第一位 / 联系人",
+      guest2: "第二位 全名",
+      guest3: "第三位 全名",
+      guest4: "第四位 全名",
       name: "姓名",
       email: "邮箱",
       phone: "电话",
@@ -155,6 +181,10 @@ export const messages = {
       slotLoadError: "无法加载可预约时段。",
       slotLoadErrorStatus: "无法加载可预约时段（{status}）。",
       slotLiveCounts: "实时余位不可用（{reason}）。为便于规划，时段仍显示满额容量。",
+      coffeeCupsLeft: "剩余 {count} 杯",
+      coffeeSoldOutBadge: "已售罄",
+      coffeeCupLiveCounts:
+        "实时杯数不可用（{reason}）。仍可勾选；最终以提交预约时为准。",
     },
     theme: {
       useDark: "使用深色主视觉",
