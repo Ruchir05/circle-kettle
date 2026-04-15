@@ -1,12 +1,14 @@
 "use client";
 
 import type { Coffee } from "@/lib/coffees";
+import { useI18n } from "@/lib/i18n";
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 type Props = { coffees: Coffee[] };
 
 export function HomeBeanShowcase({ coffees }: Props) {
+  const { t } = useI18n();
   const [detail, setDetail] = useState<Coffee | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const titleId = useId();
@@ -99,7 +101,7 @@ export function HomeBeanShowcase({ coffees }: Props) {
       >
         <button
           type="button"
-          aria-label="Close coffee details"
+          aria-label={t("beans.closeDetails")}
           className={`absolute inset-0 min-h-[100dvh] bg-[#1f1f1f] transition-opacity duration-[680ms] ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none ${
             drawerOpen ? "opacity-40" : "opacity-0"
           }`}
@@ -127,7 +129,7 @@ export function HomeBeanShowcase({ coffees }: Props) {
                 onClick={closePanel}
                 className="shrink-0 text-sm font-medium text-[color:var(--foreground-muted)] underline decoration-[color:var(--border)] underline-offset-[5px] transition-colors hover:text-[color:var(--foreground)] hover:decoration-[color:var(--foreground)]"
               >
-                Close
+                {t("beans.close")}
               </button>
             </div>
             {detail.subtitle ? (
@@ -161,7 +163,7 @@ export function HomeBeanShowcase({ coffees }: Props) {
                 {detail.origin && (
                   <div>
                     <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-                      Origin
+                      {t("beans.origin")}
                     </dt>
                     <dd className="mt-2 text-sm">{detail.origin}</dd>
                   </div>
@@ -169,7 +171,7 @@ export function HomeBeanShowcase({ coffees }: Props) {
                 {detail.variety && (
                   <div>
                     <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-                      Variety
+                      {t("beans.variety")}
                     </dt>
                     <dd className="mt-2 text-sm">{detail.variety}</dd>
                   </div>
@@ -177,7 +179,7 @@ export function HomeBeanShowcase({ coffees }: Props) {
                 {detail.producer && (
                   <div>
                     <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-                      Producer
+                      {t("beans.producer")}
                     </dt>
                     <dd className="mt-2 text-sm">{detail.producer}</dd>
                   </div>
@@ -185,7 +187,7 @@ export function HomeBeanShowcase({ coffees }: Props) {
                 {detail.elevation && (
                   <div>
                     <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-                      Elevation
+                      {t("beans.elevation")}
                     </dt>
                     <dd className="mt-2 text-sm">{detail.elevation}</dd>
                   </div>
@@ -193,7 +195,7 @@ export function HomeBeanShowcase({ coffees }: Props) {
                 {detail.process && (
                   <div>
                     <dt className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-                      Process
+                      {t("beans.process")}
                     </dt>
                     <dd className="mt-2 text-sm leading-relaxed">{detail.process}</dd>
                   </div>
@@ -210,7 +212,7 @@ export function HomeBeanShowcase({ coffees }: Props) {
       <div
         className="grid w-full min-w-0 grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4 md:gap-6"
         role="list"
-        aria-label="Featured coffees"
+        aria-label={t("beans.listLabel")}
       >
         {coffees.map((coffee) => (
           <div key={coffee.slug} role="listitem" className="min-w-0">

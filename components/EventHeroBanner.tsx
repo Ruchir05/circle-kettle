@@ -1,7 +1,10 @@
+"use client";
+
 import Link from "next/link";
 import { CoffeePlantGraphic } from "@/components/CoffeePlantGraphic";
 import { getContactPhoneDisplay, POPUP_VENUE_ADDRESS_LINES } from "@/lib/config";
-import { getPopupScheduleLines } from "@/lib/popupDisplay";
+import { useI18n } from "@/lib/i18n";
+import { getPopupScheduleLinesForLocale } from "@/lib/popupDisplay";
 
 const heroLinkClass =
   "hero-inline-link text-sm font-medium underline underline-offset-[6px] transition-[text-decoration-color,color]";
@@ -10,13 +13,15 @@ const heroLinkClass =
 const copyMax = "max-w-[40rem]";
 
 export function EventHeroBanner() {
-  const schedule = getPopupScheduleLines();
+  const { locale, t } = useI18n();
+  const schedule = getPopupScheduleLinesForLocale(locale);
   const phone = getContactPhoneDisplay();
 
   return (
     <section
       className="box-border flex min-h-[100dvh] flex-col pr-[8%] pb-[12dvh] text-[color:var(--hero-text)]"
       style={{ backgroundColor: "var(--hero-bg)" }}
+      suppressHydrationWarning
     >
       {/*
         lg: items-stretch so the main column gets the full inset height (required for justify-center).
@@ -24,31 +29,29 @@ export function EventHeroBanner() {
       */}
       <div className="flex w-full min-h-0 flex-1 flex-col lg:h-[calc(100dvh-12dvh)] lg:min-h-[calc(100dvh-12dvh)] lg:flex-row lg:items-stretch">
         {/* Main charcoal — stretches full row height on lg; copy vertically centered */}
-        <div className="relative flex min-h-[calc(100dvh-12dvh)] flex-1 flex-col px-6 py-14 sm:px-8 sm:py-16 lg:min-h-0 lg:flex-1 lg:justify-center lg:py-0 lg:pl-8 lg:pr-4 xl:pl-12">
+        <div className="relative flex min-h-[calc(100dvh-12dvh)] flex-1 flex-col px-6 py-14 sm:py-16 lg:min-h-0 lg:flex-1 lg:justify-center lg:py-0 lg:pr-4 lg:pl-[max(1.5rem,calc((100vw-var(--container-6xl))/2+1.5rem))]">
           {/*
             < lg: copy + plant share space in normal flow (no full-bleed overlay), so the graphic
             sits in empty margin — column + bottom-right on phones, row + right column on md–lg.
             lg+: plant returns to an absolute layer (decorative, right edge) like before.
           */}
           <div className="relative z-[2] mx-auto flex w-full max-w-6xl flex-1 flex-col gap-8 md:flex-row md:items-center md:justify-between md:gap-6 lg:mx-0 lg:flex lg:h-full lg:max-w-none lg:min-h-0 lg:flex-1 lg:flex-col">
-            <div className="relative z-[2] flex min-h-0 flex-1 flex-col justify-center md:min-w-0 lg:z-[3] lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:justify-center">
-              <div className={copyMax}>
+            <div className="relative z-[2] flex min-h-0 flex-1 flex-col justify-center md:min-w-0 lg:z-[3] lg:flex lg:min-h-0 lg:flex-1 lg:flex-col lg:justify-center lg:self-start">
+              <div className={`${copyMax} text-left`}>
                 <p className="text-xs font-semibold uppercase tracking-[0.22em] text-[color:var(--hero-kicker)]">
-                  One day only · UIUC
+                  {t("hero.kicker")}
                 </p>
                 <h1 className="mt-6 text-4xl font-semibold leading-[1.08] tracking-tight text-[color:var(--hero-text-muted)] sm:text-5xl lg:text-6xl xl:text-[3.5rem] xl:leading-[1.06]">
-                  Coffee, unhurried. A thirty-minute table for up to four.
+                  {t("hero.title")}
                 </h1>
 
                 <p className="mt-8 text-base leading-relaxed text-[color:var(--hero-text-muted)] sm:text-lg">
-                  We brew a focused menu of single-origin lots—bright, balanced, and bold—so you can taste
-                  with a little guidance and a lot of room to talk. Book a slot, pick a coffee or stay
-                  open-minded, and we will meet you there.
+                  {t("hero.lead")}
                 </p>
 
-                <div className="mt-10">
-                  <Link href="/book" className={heroLinkClass}>
-                    Book a tasting
+                <div className="mt-10 text-left">
+                  <Link href="/book" className={`${heroLinkClass} inline-block`}>
+                    {t("hero.bookCta")}
                   </Link>
                 </div>
               </div>
@@ -76,7 +79,7 @@ export function EventHeroBanner() {
           <div className="space-y-7 overflow-y-auto lg:space-y-8">
             <div className="border-b border-[color:var(--border)] pb-7 lg:pb-8">
               <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--foreground-muted)]">
-                Hours
+                {t("hero.hours")}
               </h3>
               <p className="mt-3 text-sm font-medium leading-snug text-[color:var(--foreground)]">
                 {schedule.dateLine}
@@ -92,7 +95,7 @@ export function EventHeroBanner() {
             {phone ? (
               <div className="border-b border-[color:var(--border)] pb-7 lg:pb-8">
                 <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--foreground-muted)]">
-                  Contact
+                  {t("hero.contact")}
                 </h3>
                 <p className="mt-3">
                   <a
@@ -107,7 +110,7 @@ export function EventHeroBanner() {
 
             <div>
               <h3 className="text-xs font-semibold uppercase tracking-[0.2em] text-[color:var(--foreground-muted)]">
-                Address
+                {t("hero.address")}
               </h3>
               <p className="mt-3 text-sm leading-snug text-[color:var(--foreground)]">
                 {POPUP_VENUE_ADDRESS_LINES.map((line) => (
@@ -121,7 +124,7 @@ export function EventHeroBanner() {
                   href="/book"
                   className="text-sm font-medium text-[color:var(--foreground)] underline decoration-[color:var(--border)] underline-offset-[5px] transition-colors hover:decoration-[color:var(--foreground)]"
                 >
-                  Book a tasting
+                  {t("hero.bookCta")}
                 </Link>
               </p>
             </div>

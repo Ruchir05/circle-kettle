@@ -1,8 +1,10 @@
 "use client";
 
 import { submitBooking, type BookingState } from "@/app/actions/booking";
+import { translateBookingUiMessage } from "@/lib/bookingUiMessages";
 import { POPUP_EVENT_DATE, POPUP_TIMEZONE } from "@/lib/config";
 import { getCoffeeOptionsForForm } from "@/lib/coffees";
+import { useI18n } from "@/lib/i18n";
 import { DateTime } from "luxon";
 import {
   useActionState,
@@ -26,13 +28,14 @@ type SlotRow = {
 };
 
 function SubmitButton({ disabled, pending }: { disabled: boolean; pending: boolean }) {
+  const { t } = useI18n();
   return (
     <button
       type="submit"
       disabled={pending || disabled}
       className="inline-flex h-12 w-full items-center justify-center rounded-full bg-[color:var(--accent)] px-8 text-sm font-semibold text-[color:var(--accent-foreground)] transition-opacity disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
     >
-      {pending ? "Sending…" : "Confirm booking"}
+      {pending ? t("bookForm.sending") : t("bookForm.confirm")}
     </button>
   );
 }
@@ -44,6 +47,7 @@ function formatSlotLabel(iso: string): string {
 }
 
 export function BookForm() {
+  const { locale, t } = useI18n();
   const [state, formAction, isSubmitPending] = useActionState(submitBooking, initial);
   const [slots, setSlots] = useState<SlotRow[] | null>(null);
   const [slotsError, setSlotsError] = useState<string | null>(null);
@@ -65,23 +69,23 @@ export function BookForm() {
         };
         if (!res.ok) {
           setSlotsError(
-            json.message ?? json.error ?? `Could not load availability (${res.status}).`,
+            json.message ??
+              json.error ??
+              t("bookForm.slotLoadErrorStatus", { status: String(res.status) }),
           );
           setSlots([]);
           return;
         }
         if (json.supabase_error) {
-          setSlotsError(
-            `Live counts unavailable (${json.supabase_error}). Slots still show full capacity for planning.`,
-          );
+          setSlotsError(t("bookForm.slotLiveCounts", { reason: json.supabase_error }));
         }
         setSlots(json.slots ?? []);
       } catch {
-        setSlotsError("Could not load availability.");
+        setSlotsError(t("bookForm.slotLoadError"));
         setSlots([]);
       }
     });
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     loadSlots();
@@ -106,30 +110,36 @@ export function BookForm() {
     if (el) el.value = "";
   }, []);
 
-  const coffeeOptions = useMemo(() => getCoffeeOptionsForForm(), []);
+  const coffeeOptions = useMemo(() => getCoffeeOptionsForForm(locale), [locale]);
 
   return (
     <div className="grid gap-12 lg:grid-cols-5">
       <div className="lg:col-span-2">
         <h2 className="text-3xl font-semibold tracking-tight text-[color:var(--foreground)]">
-          Your visit
+          {t("bookForm.yourVisit")}
         </h2>
         <p className="mt-4 text-sm leading-relaxed text-[color:var(--foreground-muted)]">
-          Slots are 30 minutes, shared with other small parties until the room cap is reached.
+          {t("bookForm.visitHelp")}
         </p>
         <div className="mt-8 space-y-3 text-sm text-[color:var(--foreground)]">
           <p>
-            <span className="font-medium text-[color:var(--foreground-muted)]">When · </span>
-            Saturday, April 18, 2026 · 1:00–5:00 PM (Central)
+            <span className="font-medium text-[color:var(--foreground-muted)]">
+              {t("bookForm.whenLabel")}
+            </span>
+            {t("bookForm.whenValue")}
           </p>
           <p>
-            <span className="font-medium text-[color:var(--foreground-muted)]">Where · </span>
-            1004 W Main Street, Urbana, IL 61801, Unit 204
+            <span className="font-medium text-[color:var(--foreground-muted)]">
+              {t("bookForm.whereLabel")}
+            </span>
+            {t("bookForm.whereValue")}
           </p>
         </div>
         {slotsError && <p className="mt-4 text-sm text-red-700">{slotsError}</p>}
         {isPending && !slots && (
-          <p className="mt-4 text-sm text-[color:var(--foreground-muted)]">Loading…</p>
+          <p className="mt-4 text-sm text-[color:var(--foreground-muted)]">
+            {t("bookForm.loadingSlots")}
+          </p>
         )}
       </div>
 
@@ -146,12 +156,10 @@ export function BookForm() {
 
         <fieldset key={POPUP_EVENT_DATE} className="space-y-4">
           <legend className="text-2xl font-semibold tracking-tight text-[color:var(--foreground)]">
-            Timeslot
+            {t("bookForm.timeslot")}
           </legend>
           {!slots?.length && !isPending && (
-            <p className="text-sm text-[color:var(--foreground-muted)]">
-              No slots are available right now. Please check back later.
-            </p>
+            <p className="text-sm text-[color:var(--foreground-muted)]">{t("bookForm.noSlots")}</p>
           )}
           <ul className="space-y-3">
             {slots?.map((row) => {
@@ -182,7 +190,12 @@ export function BookForm() {
                       </span>
                     </span>
                     <span className="text-[color:var(--foreground-muted)]">
-                      {disabled ? "Full" : `${row.remaining} / ${row.capacity} spots`}
+                      {disabled
+                        ? t("bookForm.full")
+                        : t("bookForm.spots", {
+                            remaining: row.remaining,
+                            capacity: row.capacity,
+                          })}
                     </span>
                   </label>
                 </li>
@@ -193,21 +206,27 @@ export function BookForm() {
 
         <div className="grid gap-6 sm:grid-cols-2">
           <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-            Party size
+            {t("bookForm.partySize")}
             <select name="party_size" required defaultValue="2" className={fieldClass}>
               {[1, 2, 3, 4].map((n) => (
                 <option key={n} value={n}>
-                  {n} {n === 1 ? "guest" : "guests"}
+                  {n} {n === 1 ? t("bookForm.guest") : t("bookForm.guests")}
                 </option>
               ))}
             </select>
           </label>
 
           <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)] sm:col-span-2">
-            Coffee to taste
-            <select name="coffee_choice" required defaultValue="" className={fieldClass}>
+            {t("bookForm.coffeeChoice")}
+            <select
+              key={locale}
+              name="coffee_choice"
+              required
+              defaultValue=""
+              className={fieldClass}
+            >
               <option value="" disabled>
-                Select…
+                {t("bookForm.selectPlaceholder")}
               </option>
               {coffeeOptions.map((o) => (
                 <option key={o.slug} value={o.slug}>
@@ -220,11 +239,11 @@ export function BookForm() {
 
         <div className="grid gap-6">
           <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-            Name
+            {t("bookForm.name")}
             <input name="name" required autoComplete="name" className={fieldClass} />
           </label>
           <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-            Email
+            {t("bookForm.email")}
             <input
               name="email"
               type="email"
@@ -234,24 +253,23 @@ export function BookForm() {
             />
           </label>
           <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-            Phone{" "}
+            {t("bookForm.phone")}{" "}
             <span className="font-normal normal-case text-[color:var(--foreground-muted)]">
-              (optional)
+              {t("bookForm.optional")}
             </span>
             <input name="phone" autoComplete="tel" className={fieldClass} />
           </label>
           <label className="block text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-            Notes{" "}
+            {t("bookForm.notes")}{" "}
             <span className="font-normal normal-case text-[color:var(--foreground-muted)]">
-              (optional)
+              {t("bookForm.optional")}
             </span>
             <textarea name="notes" rows={3} className={fieldClass} />
           </label>
         </div>
 
         <p className="text-xs leading-relaxed text-[color:var(--foreground-muted)]">
-          We only use your details to run this reservation. You can add a fuller privacy policy
-          later; nothing here opts you into marketing.
+          {t("bookForm.privacy")}
         </p>
 
         {state.message && (
@@ -259,7 +277,7 @@ export function BookForm() {
             role={state.ok ? "status" : "alert"}
             className={`text-sm ${state.ok ? "text-emerald-800" : "text-red-800"}`}
           >
-            {state.message}
+            {translateBookingUiMessage(state.message, locale)}
           </p>
         )}
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/lib/i18n";
 import { useCallback, useSyncExternalStore } from "react";
 
 const STORAGE_KEY = "ck-theme";
@@ -39,6 +40,7 @@ function applyTheme(mode: "light" | "dark") {
 }
 
 export function ThemeToggle() {
+  const { t } = useI18n();
   const mode = useSyncExternalStore(subscribe, getThemeSnapshot, getServerSnapshot);
   const isLight = mode === "light";
 
@@ -52,8 +54,8 @@ export function ThemeToggle() {
       onClick={toggle}
       className="inline-flex h-9 min-w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--foreground)] shadow-sm transition-[background-color,box-shadow,color] hover:bg-[color:var(--background)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[color:var(--foreground)]"
       aria-pressed={isLight}
-      aria-label={isLight ? "Use dark hero" : "Use light hero"}
-      title={isLight ? "Dark hero" : "Light hero"}
+      aria-label={isLight ? t("theme.useDark") : t("theme.useLight")}
+      title={isLight ? t("theme.darkTitle") : t("theme.lightTitle")}
       suppressHydrationWarning
     >
       {isLight ? (

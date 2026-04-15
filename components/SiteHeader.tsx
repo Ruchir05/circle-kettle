@@ -1,11 +1,18 @@
-import Link from "next/link";
-import { ThemeToggle } from "@/components/ThemeToggle";
+"use client";
 
-const nav = [{ href: "/book", label: "Book a tasting" }];
+import Link from "next/link";
+import { LanguageToggle } from "@/components/LanguageToggle";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { useI18n } from "@/lib/i18n";
 
 export function SiteHeader() {
+  const { t } = useI18n();
+
   return (
-    <header className="border-b border-[color:var(--border)] bg-[color:var(--surface)]/80 backdrop-blur-sm">
+    <header
+      className="border-b border-[color:var(--border)] bg-[color:var(--surface)]/80 backdrop-blur-sm"
+      suppressHydrationWarning
+    >
       <div className="mx-auto flex max-w-6xl items-center justify-between gap-6 px-6 py-5">
         <Link
           href="/"
@@ -13,18 +20,16 @@ export function SiteHeader() {
         >
           Circle Kettle
         </Link>
-        <div className="flex items-center gap-4 sm:gap-6">
-          <nav aria-label="Main" className="flex items-center gap-6 text-sm font-medium">
-            {nav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="text-[color:var(--foreground-muted)] underline-offset-4 transition-colors hover:text-[color:var(--foreground)] hover:underline"
-              >
-                {item.label}
-              </Link>
-            ))}
+        <div className="flex items-center gap-3 sm:gap-5">
+          <nav aria-label="Main" className="flex items-center gap-4 text-sm font-medium sm:gap-6">
+            <Link
+              href="/book"
+              className="text-[color:var(--foreground-muted)] underline-offset-4 transition-colors hover:text-[color:var(--foreground)] hover:underline"
+            >
+              {t("nav.bookTasting")}
+            </Link>
           </nav>
+          <LanguageToggle />
           <ThemeToggle />
         </div>
       </div>

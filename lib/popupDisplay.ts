@@ -7,6 +7,17 @@ export type PopupScheduleLines = {
   reservationNote: string;
 };
 
+export function getPopupScheduleLinesForLocale(locale: "en" | "zh"): PopupScheduleLines {
+  if (locale === "zh") {
+    return {
+      dateLine: "2026年4月18日（星期六）",
+      timeLine: "下午1:00–5:00（美中时间）",
+      reservationNote: "30分钟预约 · 最多4位",
+    };
+  }
+  return getPopupScheduleLines();
+}
+
 export function getPopupScheduleLines(): PopupScheduleLines {
   const zone: string = POPUP_TIMEZONE;
   const day = DateTime.fromISO(POPUP_EVENT_DATE, { zone });

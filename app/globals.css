@@ -1,5 +1,10 @@
 @import "tailwindcss";
 
+html[data-locale="zh"] body {
+  font-family: var(--font-dm-sans), "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans SC",
+    sans-serif;
+}
+
 :root {
   --background: #f6f3ee;
   --surface: #fbf9f6;

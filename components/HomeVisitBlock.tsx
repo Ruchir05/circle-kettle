@@ -1,17 +1,21 @@
+"use client";
+
 import { getContactPhoneDisplay, POPUP_VENUE_ADDRESS_LINES } from "@/lib/config";
-import { getPopupScheduleLines } from "@/lib/popupDisplay";
+import { useI18n } from "@/lib/i18n";
+import { getPopupScheduleLinesForLocale } from "@/lib/popupDisplay";
 
 /**
  * Bottom-of-page visit summary (duplicates hero rail info for scrollers).
  */
 export function HomeVisitBlock() {
-  const schedule = getPopupScheduleLines();
+  const { locale, t } = useI18n();
+  const schedule = getPopupScheduleLinesForLocale(locale);
   const phone = getContactPhoneDisplay();
 
   return (
     <aside className="w-full border border-[color:var(--border)] bg-[color:var(--surface)] p-6 sm:p-8">
       <h3 className="text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-        Hours
+        {t("visitBlock.hours")}
       </h3>
       <p className="mt-4 text-sm leading-relaxed text-[color:var(--foreground)]">
         {schedule.dateLine}
@@ -24,7 +28,7 @@ export function HomeVisitBlock() {
       {phone ? (
         <>
           <h3 className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-            Contact
+            {t("visitBlock.contact")}
           </h3>
           <p className="mt-3 text-sm leading-relaxed text-[color:var(--foreground)]">
             <a
@@ -38,7 +42,7 @@ export function HomeVisitBlock() {
       ) : null}
 
       <h3 className="mt-6 text-xs font-semibold uppercase tracking-[0.18em] text-[color:var(--foreground-muted)]">
-        Address
+        {t("visitBlock.address")}
       </h3>
       <p className="mt-3 text-sm leading-relaxed text-[color:var(--foreground)]">
         {POPUP_VENUE_ADDRESS_LINES.map((line) => (

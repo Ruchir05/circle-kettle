@@ -1,4 +1,5 @@
 import coffeesData from "@/data/coffees.json";
+import type { Locale } from "@/lib/messages";
 
 export type Coffee = {
   slug: string;
@@ -25,8 +26,10 @@ export function getCoffeeBySlug(slug: string): Coffee | undefined {
 }
 
 /** Label for booking `coffee_choice` (slug or `unsure`). */
-export function getCoffeeChoiceLabel(slug: string): string {
-  if (slug === "unsure") return "Unsure — surprise me";
+export function getCoffeeChoiceLabel(slug: string, locale: Locale = "en"): string {
+  if (slug === "unsure") {
+    return locale === "zh" ? "不确定 — 由我们推荐" : "Unsure — surprise me";
+  }
   return getCoffeeBySlug(slug)?.name ?? slug;
 }
 
@@ -39,9 +42,8 @@ export function isCoffeeSlugOrUnsure(value: string): boolean {
   return list.some((c) => c.slug === value);
 }
 
-export function getCoffeeOptionsForForm(): { slug: string; label: string }[] {
-  return [
-    ...list.map((c) => ({ slug: c.slug, label: c.name })),
-    { slug: "unsure", label: "Unsure — surprise me" },
-  ];
+export function getCoffeeOptionsForForm(locale: Locale = "en"): { slug: string; label: string }[] {
+  const unsure =
+    locale === "zh" ? "不确定 — 由我们推荐" : "Unsure — surprise me";
+  return [...list.map((c) => ({ slug: c.slug, label: c.name })), { slug: "unsure", label: unsure }];
 }
