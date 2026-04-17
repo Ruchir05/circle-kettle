@@ -6,6 +6,93 @@ import { useI18n } from "@/lib/i18n";
 import { useCallback, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
+type BeanSlideCardProps = {
+  coffee: Coffee;
+  cupMap: Record<string, number> | null;
+  cupsDemo: boolean;
+  t: (path: string, vars?: Record<string, string | number>) => string;
+  openPanel: (coffee: Coffee) => void;
+};
+
+function BeanSlideCard({ coffee, cupMap, cupsDemo, t, openPanel }: BeanSlideCardProps) {
+  const catalogOff = coffee.available === false;
+  const remaining =
+    cupMap && !cupsDemo && Object.hasOwn(cupMap, coffee.slug) ? cupMap[coffee.slug] : undefined;
+  const remainingKnown = remaining !== undefined;
+  const soldOut = catalogOff || (remainingKnown && remaining <= 0);
+  const showCupLine = catalogOff || remainingKnown;
+  const overlayCupLabel = catalogOff
+    ? t("bookForm.coffeeUnavailableBadge")
+    : remaining !== undefined && remaining <= 0
+      ? t("bookForm.coffeeSoldOutBadge")
+      : remaining !== undefined
+        ? t("bookForm.coffeeCupsLeft", { count: remaining })
+        : "";
+  return (
+    <div role="listitem" className="min-w-0">
+      <button
+        type="button"
+        onClick={() => openPanel(coffee)}
+        className="group relative w-full min-w-0 overflow-hidden border border-[color:var(--border)] bg-[color:var(--surface)] text-left"
+      >
+        <span className="relative block aspect-square w-full overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element -- local catalog art */}
+          <img
+            src={coffee.image}
+            alt=""
+            width={400}
+            height={400}
+            className={`h-full w-full object-cover ${soldOut ? "opacity-50 grayscale-[0.35]" : ""}`}
+          />
+          <span className="bean-slide-overlay pointer-events-none absolute inset-x-0 bottom-0 flex min-h-[42%] max-h-[min(55%,20rem)] flex-col border-t border-white/15 bg-[#1f1f1f]/92 px-4 pb-3 pt-3 text-[color:var(--accent-foreground)] sm:min-h-[38%]">
+            <div className="min-h-0 flex-1 overflow-hidden pb-1">
+              <span className="block text-lg font-semibold tracking-tight text-white">{coffee.name}</span>
+              {coffee.subtitle ? (
+                <span className="mt-1 block text-[0.65rem] font-medium uppercase tracking-[0.14em] text-white/65">
+                  {coffee.subtitle}
+                </span>
+              ) : null}
+              <span className="mt-2 block text-sm leading-snug text-white/85">{coffee.shortNotes}</span>
+            </div>
+            <div
+              className={`pointer-events-auto mt-auto flex shrink-0 items-end gap-2 border-t border-white/10 pt-2.5 ${
+                showCupLine ? "justify-between" : "justify-end"
+              }`}
+            >
+              {showCupLine ? (
+                <span
+                  className={`min-w-0 max-w-[58%] text-left text-[0.62rem] font-semibold uppercase leading-snug tracking-[0.12em] ${
+                    soldOut ? "text-amber-200/95" : "text-white/72"
+                  }`}
+                >
+                  {overlayCupLabel}
+                </span>
+              ) : null}
+              <span
+                aria-hidden
+                className="inline-flex shrink-0 cursor-pointer items-center gap-1.5 text-white/80 transition-colors duration-200 group-hover:text-white"
+              >
+                <span className="text-[0.66rem] font-medium uppercase tracking-[0.1em] decoration-current no-underline underline-offset-3 hover:underline">
+                  {t("beans.moreDetails")}
+                </span>
+                <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path
+                    d="M3.25 8h8.5M8.5 3.75L12.75 8 8.5 12.25"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
+            </div>
+          </span>
+        </span>
+      </button>
+    </div>
+  );
+}
+
 export function HomeBeanShowcase() {
   const { locale, t } = useI18n();
   const coffees = useMemo(() => getCoffees(locale), [locale]);
@@ -20,10 +107,50 @@ export function HomeBeanShowcase() {
   const [cupsError, setCupsError] = useState<string | null>(null);
   const titleId = useId();
   const descId = useId();
+  const carouselRegionId = useId();
   const closeBtnRef = useRef<HTMLButtonElement>(null);
   const drawerOpenRef = useRef(drawerOpen);
   /** Browser timer id (`window.setTimeout` returns a number). */
   const closeTimerRef = useRef<number | null>(null);
+  const pauseAutoRef = useRef(false);
+
+  const n = coffees.length;
+  const [startIndex, setStartIndex] = useState(0);
+
+  useEffect(() => {
+    if (n === 0) return;
+    setStartIndex((i) => Math.min(Math.max(0, i), n - 1));
+  }, [n]);
+
+  const goPrev = useCallback(() => {
+    if (n === 0) return;
+    setStartIndex((i) => (i - 1 + n) % n);
+  }, [n]);
+
+  const goNext = useCallback(() => {
+    if (n === 0) return;
+    setStartIndex((i) => (i + 1) % n);
+  }, [n]);
+
+  const desktopColsClass =
+    n >= 3 ? "sm:grid-cols-3" : n === 2 ? "sm:grid-cols-2" : "sm:grid-cols-1";
+  const desktopSlots = Math.min(3, Math.max(1, n));
+
+  useEffect(() => {
+    if (n <= 1 || selectedSlug != null) return;
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    if (mq.matches) return;
+
+    const id = window.setInterval(() => {
+      if (selectedSlug != null) return;
+      if (pauseAutoRef.current) return;
+      if (document.visibilityState !== "visible") return;
+      setStartIndex((i) => (i + 1) % n);
+    }, 3_800);
+
+    return () => window.clearInterval(id);
+  }, [n, selectedSlug]);
 
   useLayoutEffect(() => {
     drawerOpenRef.current = drawerOpen;
@@ -176,9 +303,14 @@ export function HomeBeanShowcase() {
         >
           <div className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain p-6 sm:p-8">
             <div className="flex shrink-0 items-start justify-between gap-4">
-              <h2 id={titleId} className="text-2xl font-semibold tracking-tight sm:text-3xl">
-                {panelCoffee.name}
-              </h2>
+              <div className="min-w-0">
+                <h2 id={titleId} className="text-2xl font-semibold tracking-tight sm:text-3xl">
+                  {panelCoffee.name}
+                </h2>
+                <p className="mt-1 text-sm font-medium text-[color:var(--foreground)]">
+                  {panelCoffee.priceUsd} {locale === "zh" ? "美元" : "USD"}
+                </p>
+              </div>
               <button
                 ref={closeBtnRef}
                 type="button"
@@ -196,11 +328,21 @@ export function HomeBeanShowcase() {
             <p id={descId} className="mt-2 shrink-0 text-sm text-[color:var(--foreground-muted)]">
               {panelCoffee.shortNotes}
             </p>
-            {cupMap && !cupsDemo && Object.hasOwn(cupMap, panelCoffee.slug) ? (
-              <p className="mt-3 shrink-0 text-sm font-medium text-[color:var(--foreground)]">
+            {panelCoffee.available === false ? (
+              <p className="mt-3 shrink-0 text-xs font-medium text-[color:var(--foreground-muted)]">
+                {t("bookForm.coffeeUnavailableBadge")}
+              </p>
+            ) : cupMap && !cupsDemo && Object.hasOwn(cupMap, panelCoffee.slug) ? (
+              <p
+                className={`mt-3 shrink-0 text-xs font-medium ${
+                  cupMap[panelCoffee.slug] <= 0
+                    ? "text-amber-800"
+                    : "text-[color:var(--foreground-muted)]"
+                }`}
+              >
                 {cupMap[panelCoffee.slug] <= 0
-                  ? t("beans.soldOut")
-                  : t("beans.cupsLeft", { count: cupMap[panelCoffee.slug] })}
+                  ? t("bookForm.coffeeSoldOutBadge")
+                  : t("bookForm.coffeeCupsLeft", { count: cupMap[panelCoffee.slug] })}
               </p>
             ) : null}
 
@@ -278,77 +420,108 @@ export function HomeBeanShowcase() {
         </p>
       ) : null}
       <div
-        className="grid w-full min-w-0 grid-cols-1 gap-4 sm:grid-cols-3 sm:gap-4 md:gap-6"
-        role="list"
+        role="region"
+        aria-roledescription={t("beans.carouselRoleDescription")}
         aria-label={t("beans.listLabel")}
+        className="flex w-full min-w-0 items-stretch gap-2 sm:gap-3 md:gap-4"
+        onMouseEnter={() => {
+          pauseAutoRef.current = true;
+        }}
+        onMouseLeave={() => {
+          pauseAutoRef.current = false;
+        }}
+        onFocus={() => {
+          pauseAutoRef.current = true;
+        }}
+        onBlur={(e) => {
+          if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+          pauseAutoRef.current = false;
+        }}
       >
-        {coffees.map((coffee) => {
-          const remaining =
-            cupMap && !cupsDemo && Object.hasOwn(cupMap, coffee.slug)
-              ? cupMap[coffee.slug]
-              : undefined;
-          const remainingKnown = remaining !== undefined;
-          const soldOut = remainingKnown && remaining <= 0;
-          return (
-            <div key={coffee.slug} role="listitem" className="min-w-0">
-              <button
-                type="button"
-                onClick={() => openPanel(coffee)}
-                className="group relative w-full min-w-0 overflow-hidden border border-[color:var(--border)] bg-[color:var(--surface)] text-left"
-              >
-                <span className="relative block aspect-square w-full overflow-hidden">
-                  {/* eslint-disable-next-line @next/next/no-img-element -- local catalog art */}
-                  <img
-                    src={coffee.image}
-                    alt=""
-                    width={400}
-                    height={400}
-                    className={`h-full w-full object-cover ${soldOut ? "opacity-50 grayscale-[0.35]" : ""}`}
-                  />
-                  <span className="bean-slide-overlay pointer-events-none absolute inset-x-0 bottom-0 border-t border-white/15 bg-[#1f1f1f]/92 px-4 py-4 text-[color:var(--accent-foreground)]">
-                    <span className="block text-lg font-semibold tracking-tight text-white">
-                      {coffee.name}
-                    </span>
-                    {coffee.subtitle ? (
-                      <span className="mt-1 block text-[0.65rem] font-medium uppercase tracking-[0.14em] text-white/65">
-                        {coffee.subtitle}
-                      </span>
-                    ) : null}
-                    <span className="mt-2 block text-sm leading-snug text-white/85">
-                      {coffee.shortNotes}
-                    </span>
-                    {remainingKnown ? (
-                      <span
-                        className={`mt-2 block text-[0.7rem] font-semibold uppercase tracking-[0.12em] ${
-                          soldOut ? "text-amber-200/95" : "text-white/75"
-                        }`}
-                      >
-                        {soldOut ? t("beans.soldOut") : t("beans.cupsLeft", { count: remaining })}
-                      </span>
-                    ) : null}
-                    <span
-                      aria-hidden
-                      className="pointer-events-auto absolute right-4 bottom-4 inline-flex cursor-pointer items-center gap-1.5 text-white/80 transition-colors duration-200 group-hover:text-white"
-                    >
-                      <span className="text-[0.66rem] font-medium uppercase tracking-[0.1em] decoration-current no-underline underline-offset-3 hover:underline">
-                        {t("beans.moreDetails")}
-                      </span>
-                      <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path
-                          d="M3.25 8h8.5M8.5 3.75L12.75 8 8.5 12.25"
-                          stroke="currentColor"
-                          strokeWidth="1.5"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </span>
-                  </span>
-                </span>
-              </button>
+        <button
+          type="button"
+          aria-controls={carouselRegionId}
+          aria-label={t("beans.carouselPrev")}
+          onClick={goPrev}
+          disabled={n <= 1}
+          className="flex h-auto min-h-[2.75rem] w-10 shrink-0 items-center justify-center self-center border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--foreground-muted)] transition-colors hover:border-[color:var(--foreground)]/25 hover:text-[color:var(--foreground)] disabled:cursor-not-allowed disabled:opacity-35 sm:min-h-[3.25rem] sm:w-11"
+        >
+          <svg viewBox="0 0 16 16" className="h-5 w-5" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <path
+              d="M10 3.25L5.75 7.5 10 11.75"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
+
+        <div id={carouselRegionId} className="min-w-0 flex-1 overflow-hidden">
+          {n > 0 ? (
+            <div
+              className="bean-carousel-track flex will-change-transform"
+              style={{
+                width: `${n * 100}%`,
+                transform: `translateX(-${(startIndex * 100) / n}%)`,
+              }}
+            >
+              {Array.from({ length: n }, (_, slide) => (
+                <div
+                  key={slide}
+                  className="shrink-0"
+                  style={{ width: `${100 / n}%` }}
+                  aria-hidden={slide !== startIndex}
+                >
+                  <div className="grid w-full min-w-0 grid-cols-1 gap-4 sm:hidden" role="list">
+                    <BeanSlideCard
+                      key={`${slide}-m`}
+                      coffee={coffees[slide % n]}
+                      cupMap={cupMap}
+                      cupsDemo={cupsDemo}
+                      t={t}
+                      openPanel={openPanel}
+                    />
+                  </div>
+                  <div
+                    className={`hidden w-full min-w-0 gap-4 sm:grid md:gap-6 ${desktopColsClass}`}
+                    role="list"
+                  >
+                    {Array.from({ length: desktopSlots }, (_, k) => (
+                      <BeanSlideCard
+                        key={`${slide}-${k}`}
+                        coffee={coffees[(slide + k) % n]}
+                        cupMap={cupMap}
+                        cupsDemo={cupsDemo}
+                        t={t}
+                        openPanel={openPanel}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
-          );
-        })}
+          ) : null}
+        </div>
+
+        <button
+          type="button"
+          aria-controls={carouselRegionId}
+          aria-label={t("beans.carouselNext")}
+          onClick={goNext}
+          disabled={n <= 1}
+          className="flex h-auto min-h-[2.75rem] w-10 shrink-0 items-center justify-center self-center border border-[color:var(--border)] bg-[color:var(--surface)] text-[color:var(--foreground-muted)] transition-colors hover:border-[color:var(--foreground)]/25 hover:text-[color:var(--foreground)] disabled:cursor-not-allowed disabled:opacity-35 sm:min-h-[3.25rem] sm:w-11"
+        >
+          <svg viewBox="0 0 16 16" className="h-5 w-5" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden>
+            <path
+              d="M6 3.25L10.25 7.5 6 11.75"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       </div>
 
       {portalTarget && overlay ? createPortal(overlay, portalTarget) : null}

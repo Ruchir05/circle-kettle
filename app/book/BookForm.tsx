@@ -315,6 +315,32 @@ export function BookForm() {
     });
   }, [coffeeRows, coffeeChecked, partySize, cupBySlug, cupsDemo]);
 
+  useEffect(() => {
+    setCoffeeChecked((c) => {
+      let next = c;
+      let changed = false;
+      for (const row of coffeeRows) {
+        if (!row.available && c[row.slug]) {
+          if (!changed) next = { ...c };
+          next[row.slug] = false;
+          changed = true;
+        }
+      }
+      return changed ? next : c;
+    });
+    setCoffeeQty((q) => {
+      const next = { ...q };
+      let changed = false;
+      for (const row of coffeeRows) {
+        if (!row.available && row.slug in next) {
+          delete next[row.slug];
+          changed = true;
+        }
+      }
+      return changed ? next : q;
+    });
+  }, [coffeeRows]);
+
   return (
     <div ref={revealRootRef} className="grid gap-12 lg:grid-cols-5">
       <div className={`${isInitialReady ? "lg:col-span-2" : "lg:col-span-2 opacity-0"}`}>
@@ -471,8 +497,9 @@ export function BookForm() {
                   cupBySlug && !cupsDemo && Object.hasOwn(cupBySlug, row.slug)
                     ? cupBySlug[row.slug]
                     : undefined;
-                const soldOut = inv !== undefined && inv <= 0;
-                const maxQty = Math.min(4, partySize, inv ?? 999);
+                const catalogOff = !row.available;
+                const soldOut = catalogOff || (inv !== undefined && inv <= 0);
+                const maxQty = catalogOff ? 0 : Math.min(4, partySize, inv ?? 999);
                 return (
                   <li
                     key={row.slug}
@@ -507,11 +534,15 @@ export function BookForm() {
                         <span className="font-medium text-[color:var(--foreground)]">
                           {row.label}
                         </span>
-                        {inv !== undefined ? (
+                        {catalogOff || inv !== undefined ? (
                           <span className="text-xs font-medium text-[color:var(--foreground-muted)]">
-                            {soldOut
-                              ? t("bookForm.coffeeSoldOutBadge")
-                              : t("bookForm.coffeeCupsLeft", { count: inv })}
+                            {catalogOff
+                              ? t("bookForm.coffeeUnavailableBadge")
+                              : inv !== undefined && inv <= 0
+                                ? t("bookForm.coffeeSoldOutBadge")
+                                : inv !== undefined
+                                  ? t("bookForm.coffeeCupsLeft", { count: inv })
+                                  : null}
                           </span>
                         ) : null}
                       </span>

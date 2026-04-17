@@ -1,26 +1,14 @@
 import { adminLogout } from "@/app/actions/adminAuth";
 import { AdminDeleteBookingButton } from "@/components/AdminDeleteBookingButton";
+import { AdminEditBookingForm } from "@/components/AdminEditBookingForm";
+import type { AdminBookingRow, AdminCoffeeOption, AdminSlotOption } from "@/lib/adminBookingTypes";
 import { getCoffeeChoiceLabel } from "@/lib/coffees";
 import { POPUP_TIMEZONE } from "@/lib/config";
 import { DateTime } from "luxon";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
-export type AdminBookingRow = {
-  id: string;
-  slot_start: string;
-  party_size: number;
-  coffee_choice: string;
-  name: string;
-  email: string;
-  phone: string | null;
-  notes: string | null;
-  status: string;
-  created_at: string;
-  guest_name_2?: string | null;
-  guest_name_3?: string | null;
-  guest_name_4?: string | null;
-};
+export type { AdminBookingRow, AdminCoffeeOption, AdminSlotOption } from "@/lib/adminBookingTypes";
 
 function formatPartyNames(row: AdminBookingRow): string {
   const parts = [row.name];
@@ -42,7 +30,15 @@ function formatCreated(iso: string): string {
   return dt.toFormat("MMM d, yyyy · h:mm a");
 }
 
-export function AdminBookingsTable({ rows }: { rows: AdminBookingRow[] }) {
+export function AdminBookingsTable({
+  rows,
+  slotOptions,
+  coffeeOptions,
+}: {
+  rows: AdminBookingRow[];
+  slotOptions: AdminSlotOption[];
+  coffeeOptions: AdminCoffeeOption[];
+}) {
   if (rows.length === 0) {
     return (
       <p className="rounded border border-[color:var(--border)] bg-[color:var(--surface)] px-6 py-10 text-center text-sm text-[color:var(--foreground-muted)]">
@@ -53,7 +49,7 @@ export function AdminBookingsTable({ rows }: { rows: AdminBookingRow[] }) {
 
   return (
     <div className="overflow-x-auto rounded border border-[color:var(--border)] bg-[color:var(--surface)]">
-      <table className="w-full min-w-[60rem] border-collapse text-left text-sm">
+      <table className="w-full min-w-[72rem] border-collapse text-left text-sm">
         <thead>
           <tr className="border-b border-[color:var(--border)] text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--foreground-muted)]">
             <th className="px-4 py-3 font-semibold">Slot</th>
@@ -65,6 +61,7 @@ export function AdminBookingsTable({ rows }: { rows: AdminBookingRow[] }) {
             <th className="px-4 py-3 font-semibold">Notes</th>
             <th className="px-4 py-3 font-semibold">Booked</th>
             <th className="px-4 py-3 font-semibold">Status</th>
+            <th className="min-w-[14rem] px-4 py-3 font-semibold">Edit</th>
             <th className="px-4 py-3 w-24 font-semibold text-right">Actions</th>
           </tr>
         </thead>
@@ -105,6 +102,19 @@ export function AdminBookingsTable({ rows }: { rows: AdminBookingRow[] }) {
                 {formatCreated(row.created_at)}
               </td>
               <td className="px-4 py-3 whitespace-nowrap">{row.status}</td>
+              <td className="max-w-[20rem] px-4 py-3 align-top">
+                <details className="group">
+                  <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--foreground-muted)] underline decoration-[color:var(--border)] underline-offset-2 marker:text-[color:var(--foreground-muted)]">
+                    Change slot / coffees
+                  </summary>
+                  <AdminEditBookingForm
+                    key={`${row.id}-${row.slot_start}-${row.party_size}-${row.coffee_choice}`}
+                    row={row}
+                    slotOptions={slotOptions}
+                    coffeeOptions={coffeeOptions}
+                  />
+                </details>
+              </td>
               <td className="px-4 py-3 align-top">
                 <AdminDeleteBookingButton bookingId={row.id} />
               </td>
@@ -116,7 +126,15 @@ export function AdminBookingsTable({ rows }: { rows: AdminBookingRow[] }) {
   );
 }
 
-export function AdminBookingsCards({ rows }: { rows: AdminBookingRow[] }) {
+export function AdminBookingsCards({
+  rows,
+  slotOptions,
+  coffeeOptions,
+}: {
+  rows: AdminBookingRow[];
+  slotOptions: AdminSlotOption[];
+  coffeeOptions: AdminCoffeeOption[];
+}) {
   if (rows.length === 0) {
     return (
       <p className="rounded border border-[color:var(--border)] bg-[color:var(--surface)] px-6 py-10 text-center text-sm text-[color:var(--foreground-muted)]">
@@ -157,6 +175,17 @@ export function AdminBookingsCards({ rows }: { rows: AdminBookingRow[] }) {
             Party of {row.party_size} · {row.status}
           </p>
           {row.notes?.trim() ? <p className="mt-2 text-[color:var(--foreground-muted)]">{row.notes}</p> : null}
+          <details className="mt-4 border-t border-[color:var(--border)] pt-3">
+            <summary className="cursor-pointer text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--foreground-muted)] underline decoration-[color:var(--border)] underline-offset-2">
+              Change slot / coffees
+            </summary>
+            <AdminEditBookingForm
+              key={`${row.id}-${row.slot_start}-${row.party_size}-${row.coffee_choice}`}
+              row={row}
+              slotOptions={slotOptions}
+              coffeeOptions={coffeeOptions}
+            />
+          </details>
           <div className="mt-4 flex justify-end border-t border-[color:var(--border)] pt-3">
             <AdminDeleteBookingButton bookingId={row.id} />
           </div>
@@ -171,9 +200,9 @@ export function AdminDashboardChrome({ children }: { children: ReactNode }) {
     <div className="mx-auto max-w-7xl px-6 py-10 sm:py-12">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight">Bookings</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Admin</h1>
           <p className="mt-1 text-sm text-[color:var(--foreground-muted)]">
-            Reservations and coffee choices (admin only).
+            Bookings, coffee choices, and tasting cup caps (admin only).
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-4">

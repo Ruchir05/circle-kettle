@@ -27,6 +27,7 @@
   },
   {
     "slug": "el-chaferote-7",
+    "available": false,
     "name": "EL CHAFEROTE — 7",
     "subtitle": "Pink Bourbon · Colombia",
     "shortNotes": "Grapefruit · Pear · Honeysuckle",
@@ -36,5 +37,31 @@
     "variety": "Pink Bourbon",
     "process": "Washed",
     "image": "/coffees/el-chaferote-7.png"
+  },
+  {
+    "slug": "nguisse-nare-7",
+    "name": "NGUISSE NARE — 7",
+    "subtitle": "Heirloom · Sidama, Ethiopia",
+    "shortNotes": "Mango · Hibiscus · Tamarind",
+    "longNotes": "An expressive anaerobic natural from Sidama: the cup opens with juicy mango and tropical fruit, hibiscus-like florals, and a warm, gently tangy tamarind sweetness—vibrant yet refined.\n\nHigh-grown heirloom at 2,300 masl; one of the most colorful Ethiopians we tasted this season.",
+    "priceUsd": 6.5,
+    "origin": "Sidama, Ethiopia",
+    "variety": "Heirloom",
+    "elevation": "2,300 masl",
+    "process": "Anaerobic natural",
+    "image": "/coffees/nguisse-nare-7.png"
+  },
+  {
+    "slug": "kumbya-7",
+    "name": "KUMBYA — 7",
+    "subtitle": "Red Bourbon · Rwanda",
+    "shortNotes": "Blackberry · Plum · Raisin",
+    "longNotes": "A washed Red Bourbon from Nyamasheke: deep blackberry and plum glide into a raisiny sweetness, with a clean, structured finish that stays comforting cup after cup.\n\nFrom an all-woman experimental lot at Kumpya Farm—approachable, fruit-forward, and unmistakably Rwandan.",
+    "priceUsd": 5.5,
+    "origin": "Nyamasheke District, Rwanda",
+    "variety": "Red Bourbon",
+    "producer": "All-woman experimental lot, Kumpya Farm, Nyamasheke District",
+    "process": "Washed",
+    "image": "/coffees/kumbya-7.png"
   }
 ]

@@ -297,6 +297,11 @@ select.form-field:focus-visible {
   outline-offset: 2px;
 }
 
+/* Homepage bean carousel: horizontal slide (transform set inline) */
+.bean-carousel-track {
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /* Bean card: name + notes slide up from bottom on hover (fine pointer); always visible on coarse / small */
 .bean-slide-overlay {
   transform: translateY(100%);
@@ -316,6 +321,10 @@ select.form-field:focus-visible {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .bean-carousel-track {
+    transition: none !important;
+  }
+
   .bean-slide-overlay {
     transform: translateY(0) !important;
     transition: none !important;

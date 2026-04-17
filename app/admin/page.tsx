@@ -1,10 +1,18 @@
-import {
-  AdminBookingsCards,
-  AdminBookingsTable,
-  AdminDashboardChrome,
-  type AdminBookingRow,
-} from "@/components/AdminBookingsTable";
+import { AdminBookingsCards, AdminBookingsTable, AdminDashboardChrome } from "@/components/AdminBookingsTable";
+import type { AdminBookingRow } from "@/lib/adminBookingTypes";
+import { AdminCoffeeCapsPanel, type AdminCoffeeCapRow } from "@/components/AdminCoffeeCapsPanel";
+import { getCoffeeForDisplay, getCoffeeRowsForAdminEdit } from "@/lib/coffees";
+import { POPUP_EVENT_DATE, POPUP_TIMEZONE } from "@/lib/config";
 import { createServiceClient } from "@/lib/supabase/service";
+import { getSlotStartsForCalendarDay } from "@/lib/schedule";
+import { DateTime } from "luxon";
+import type { ReactNode } from "react";
+
+function formatAdminSlotLabel(iso: string): string {
+  const start = DateTime.fromISO(iso, { zone: "utc" }).setZone(POPUP_TIMEZONE);
+  const end = start.plus({ minutes: 30 });
+  return `${start.toFormat("h:mm a")}–${end.toFormat("h:mm a")}`;
+}
 
 export const dynamic = "force-dynamic";
 
@@ -75,13 +83,69 @@ export default async function AdminBookingsPage() {
 
   const rows = rowsData ?? [];
 
+  const slotStarts = getSlotStartsForCalendarDay(POPUP_EVENT_DATE);
+  const slotOptions = slotStarts.map((iso) => ({
+    value: iso,
+    label: formatAdminSlotLabel(iso),
+  }));
+  const coffeeEditOptions = getCoffeeRowsForAdminEdit("en");
+
+  const capsRes = await client
+    .from("coffee_cup_caps")
+    .select("coffee_slug, max_cups")
+    .order("coffee_slug", { ascending: true });
+
+  let coffeeCapSection: ReactNode = null;
+  if (capsRes.error) {
+    coffeeCapSection = (
+      <p className="mb-10 text-sm text-amber-800" role="alert">
+        Could not load coffee cup caps: {capsRes.error.message}
+      </p>
+    );
+  } else {
+    const availRes = await client.rpc("get_coffee_cup_availability");
+    const availList = Array.isArray(availRes.data) ? availRes.data : [];
+    const availBySlug = new Map(
+      availList.map(
+        (r: { coffee_slug: string; booked: number; remaining: number }) =>
+          [String(r.coffee_slug), { booked: Number(r.booked), remaining: Number(r.remaining) }] as const,
+      ),
+    );
+    const capRows: AdminCoffeeCapRow[] = (capsRes.data ?? []).map(
+      (row: { coffee_slug: string; max_cups: number }) => {
+        const slug = String(row.coffee_slug);
+        const snap = availBySlug.get(slug);
+        return {
+          slug,
+          label: getCoffeeForDisplay(slug, "en")?.name ?? slug,
+          maxCups: Number(row.max_cups),
+          ...(snap
+            ? { booked: snap.booked, remaining: snap.remaining }
+            : {}),
+        };
+      },
+    );
+    const countsWarning =
+      availRes.error != null
+        ? `Live booked / remaining counts unavailable: ${availRes.error.message}. You can still edit max caps.`
+        : null;
+    coffeeCapSection =
+      capRows.length > 0 ? (
+        <div className="mb-10">
+          <AdminCoffeeCapsPanel rows={capRows} countsWarning={countsWarning} />
+        </div>
+      ) : null;
+  }
+
   return (
     <AdminDashboardChrome>
+      {coffeeCapSection}
+      <h2 className="mb-4 text-lg font-semibold tracking-tight">Bookings</h2>
       <div className="hidden lg:block">
-        <AdminBookingsTable rows={rows} />
+        <AdminBookingsTable rows={rows} slotOptions={slotOptions} coffeeOptions={coffeeEditOptions} />
       </div>
       <div className="lg:hidden">
-        <AdminBookingsCards rows={rows} />
+        <AdminBookingsCards rows={rows} slotOptions={slotOptions} coffeeOptions={coffeeEditOptions} />
       </div>
     </AdminDashboardChrome>
   );
